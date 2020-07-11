@@ -1,12 +1,12 @@
 # Overall
 
-This code contains just one main project with all necessary resources to get into.
+This code contains Descompresor Resources, Particle Editor, Launcher, Client and Server with all necessary resources to get into.
 
 Extra credits to Leandro Mendoza(Mannakia) and Pablo Marquez 
 
 # How to install
 
- - Download visual studio and open .sln file
+ - Download visual basic 6.0
  - Install a local mysql database and change credentials into Base.vb file
 
 # Images
