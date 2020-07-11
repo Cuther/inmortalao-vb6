@@ -2,7 +2,7 @@
 
 This code contains just one main project with all necessary resources to get into.
 
-This code was based into original InmortalAO vb 6.0 server, credits to Jose Ignacio Castelli, Leandro Mendoza(Mannakia) and Pablo Marquez 
+Extra credits to Leandro Mendoza(Mannakia) and Pablo Marquez 
 
 # How to install
 
