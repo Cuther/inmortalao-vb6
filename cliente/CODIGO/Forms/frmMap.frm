@@ -2,26 +2,34 @@ VERSION 5.00
 Begin VB.Form frmMap 
    BorderStyle     =   0  'None
    Caption         =   "Form1"
-   ClientHeight    =   8970
+   ClientHeight    =   9000
    ClientLeft      =   0
    ClientTop       =   0
-   ClientWidth     =   6630
+   ClientWidth     =   12000
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   598
+   ScaleHeight     =   600
    ScaleMode       =   3  'Pixel
-   ScaleWidth      =   442
+   ScaleWidth      =   800
    ShowInTaskbar   =   0   'False
+   StartUpPosition =   3  'Windows Default
    Begin VB.Shape shpMap 
       BorderStyle     =   0  'Transparent
       FillColor       =   &H000000FF&
       FillStyle       =   0  'Solid
       Height          =   135
-      Left            =   2280
+      Left            =   9480
       Shape           =   3  'Circle
-      Top             =   2400
+      Top             =   3240
       Width           =   135
+   End
+   Begin VB.Image imgMap 
+      Appearance      =   0  'Flat
+      Height          =   8655
+      Left            =   180
+      Top             =   180
+      Width           =   11655
    End
    Begin VB.Label lblMMAP 
       AutoSize        =   -1  'True
@@ -38,9 +46,9 @@ Begin VB.Form frmMap
       EndProperty
       ForeColor       =   &H8000000E&
       Height          =   240
-      Left            =   120
+      Left            =   1440
       TabIndex        =   1
-      Top             =   7560
+      Top             =   8520
       Width           =   1545
    End
    Begin VB.Label lbIMAP 
@@ -58,9 +66,9 @@ Begin VB.Form frmMap
       EndProperty
       ForeColor       =   &H8000000E&
       Height          =   240
-      Left            =   120
+      Left            =   1440
       TabIndex        =   0
-      Top             =   7320
+      Top             =   8280
       Width           =   855
    End
    Begin VB.Line ln2 
@@ -77,13 +85,6 @@ Begin VB.Form frmMap
       Y1              =   589
       Y2              =   12
    End
-   Begin VB.Image imgMap 
-      Appearance      =   0  'Flat
-      Height          =   8970
-      Left            =   0
-      Top             =   0
-      Width           =   6630
-   End
 End
 Attribute VB_Name = "frmMap"
 Attribute VB_GlobalNameSpace = False
@@ -91,16 +92,15 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
-Dim xx As Single, yy As Single
+Dim xx As Integer, yy As Integer
 
 Private Sub Form_Load()
-
-    Me.Picture = LoadInterface("imagenmundo")
+    Me.Picture = LoadInterface("mundo")
     
-    'Me.Top = frmMain.Top
+    Me.Top = frmMain.Top
+    Me.Left = frmMain.Left
+    
     Aplicar_Transparencia Me.hwnd, 237
-
-
 
 End Sub
 
@@ -116,20 +116,24 @@ Private Sub imgMap_DblClick()
 
     #If ClienteGM = 1 Then
             Call WriteWarpChar("YO", MapTable(xx, yy), 50, 50)
+           
     #End If
+     SetMapPoint
 End Sub
 
 
 Private Sub imgMap_MouseMove(Button As Integer, Shift As Integer, X As Single, Y As Single)
     
-    X = X * 0.066666666666667
-    Y = Y * 0.066666666666667
-    xx = Int(X / 26 + 1)
-    yy = Int(Y / 26 + 1)
+    X = X / 15 - 12
+    Y = Y / 15 - 12
+    xx = X / 26 + 1
+    yy = Y / 25 + 1
                 
-    If xx <= 0 Or yy <= 0 Or xx > 17 Or yy > 23 Then Exit Sub
-    lblMMAP.Caption = "Posición cursor: " & MapNameTable(xx, yy) & " (" & MapTable(xx, yy) & ")"
-    
+    If xx <= 0 Or yy <= 0 Or xx > 30 Or yy > 23 Then Exit Sub
+    lblMMAP.Caption = "Posición cursor: " & MapNames(MapTable(xx, yy)) & " (" & MapTable(xx, yy) & ")"
+
+
+
 End Sub
 
 Private Sub imgMap_MouseUp(Button As Integer, Shift As Integer, X As Single, Y As Single)
@@ -139,23 +143,17 @@ Private Sub imgMap_MouseUp(Button As Integer, Shift As Integer, X As Single, Y A
     End If
 End Sub
 Public Sub SetMapPoint()
-    
-
-    Dim X As Long, Y As Long
-    Dim gotPos As Boolean
-    shpMap.Visible = False
-    
-    For Y = 1 To 23
-        For X = 1 To 17
-            If MapTable(X, Y) = UserMap Then
-                shpMap.Left = (X - 1) * 26 + 26 / 2 - shpMap.width / 2
-                shpMap.Top = (Y - 1) * 26 + 26 / 2 - shpMap.height / 2
-                shpMap.Visible = True
-                lbIMAP.Caption = "Posición: " & MapNameTable(X, Y) & " (" & MapTable(X, Y) & ")"
-                Exit Sub
+    Dim i As Long, ii As Long
+    For i = 1 To 30
+        For ii = 1 To 23
+            If MapTable(i, ii) = UserMap Then
+                shpMap.Top = (ii - 1) * 25 + 12 + 9
+                shpMap.Left = (i - 1) * 26 + 12 + 9
+                
+                lbIMAP.Caption = "Posición: " & MapNames(MapTable(i, ii)) & " (" & MapTable(i, ii) & ")"
+                Exit For
             End If
-        Next X
-    Next Y
-        
-        
+        Next ii
+    Next i
+    
 End Sub

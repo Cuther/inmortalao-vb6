@@ -14,7 +14,6 @@ Private Const HTCAPTION = 2
 Public ActualSecond As Long
 Public LastSecond As Long
 
-Public PuedeRecibirPaquetes As Boolean
 
 
 Private Declare Function foo Lib "InmortalDLL.dll" () As Integer
@@ -62,8 +61,7 @@ Public numSpells As Long
 
 '***********************************************
 Public MapNames(1 To 851) As String
-Public MapTable() As String
-Public MapNameTable() As String
+Public MapTable(1 To 30, 1 To 23) As Integer
 '***********************************************
 
 Sub AddToChat(ByRef Text As String, Optional ByVal Font As Byte = 11, Optional ByVal Console As Byte = 1)
@@ -163,9 +161,7 @@ End Sub
 
 
 Private Sub CheckKeys()
-    
-    
-    On Error Resume Next
+    If Not IsAppActive() Then Exit Sub
     
     If Comerciando Then Exit Sub
 
@@ -220,10 +216,6 @@ Private Sub CheckKeys()
             End If
         End If
     End If
-    
-    Exit Sub
-    
-    
 End Sub
 
 Function FieldCount(ByRef Text As String, ByVal SepASCII As Byte) As Long
@@ -254,40 +246,34 @@ Function FileExist(ByVal file As String, ByVal FileType As VbFileAttribute) As B
     FileExist = (Dir$(file, FileType) <> "")
 End Function
 
-Public Sub drawGame()
-    
-    If IsAppActive Then
-        If frmMain.Visible Then
-            Call TileEngine.Engine_Render
-            Call CheckKeys
-            
-            If RenderInv Then
-                TileEngine.Inventory_Render
-            End If
-        End If
-    Else
-        If frmMain.Visible Then
-            RenderInv = True
-        End If
-        
-        Sleep 100
-    End If
-    
-    DoEvents
-    
-End Sub
-
 Sub Main()
+On Error GoTo Err
 
+
+    
     InicializarVariables
 
-    'frmMain.Winsock1.Close
-    'frmMain.Winsock1.Protocol = sckUDPProtocol
- '   frmMain.Winsock1.Bind 7777
+    frmMain.Winsock1.Close
+    frmMain.Winsock1.Protocol = sckUDPProtocol
+   '' frmMain.Winsock1.Bind 5000
     
-'    frmMain.Winsock1.RemoteHost = "localhost"
-  '  frmMain.Winsock1.RemotePort = 7777
+    frmMain.Winsock1.RemoteHost = "192.168.0.3"
+    frmMain.Winsock1.RemotePort = 5000
 
+    'AoDefAntiShInitialize
+    
+    'If AoDefDebugger Then
+    '    Call AoDefAntiDebugger
+    '    End
+    'End If
+    
+    'Activar IMPORTANTE
+    'If AoDefMultiClient Then
+        'Call AoDefMultiClientOn
+        'End
+    'End If
+    
+    'Add Marius Actualizamos el Luncher
     'If FileExist(App.Path & "\Launcher2.exe", vbNormal) Then
     '    If FileExist(App.Path & "\Launcher.exe", vbNormal) Then
     '        Call Kill(App.Path & "\Launcher.exe")
@@ -296,10 +282,13 @@ Sub Main()
     '    Call FileCopy(App.Path + "\Launcher2.exe", App.Path + "\Launcher.exe")
     '    Call Kill(App.Path & "\Launcher2.exe")
     'End If
+    '\Add
+    
     
     Load frmCargando
     frmCargando.Visible = True
     DoEvents
+
     
     Protocol.InitFonts
     LoadConfig
@@ -310,7 +299,9 @@ Sub Main()
 
     If Not (TileEngine.Engine_Init) Then End
 
+
     frmCargando.SetAddWith 30
+    
     
     LoadLocales
 
@@ -321,14 +312,40 @@ Sub Main()
         
     frmCargando.SetAddWith 25
         
-    Call Inventario.Initialize(frmMain.picInv)
-
-    perm = True
-    prgRun = True
-    Pausa = False
+        Call Inventario.Initialize(frmMain.picInv)
+        'frmMain.Socket1.Startup
+    
+        'Inicialización de variables globales
+        perm = True
+        prgRun = True
+        Pausa = False
         
     frmCargando.SetAddWith 20
+        
+        'Set the intervals of timers
+        Call MainTimer.SetInterval(TimersIndex.Attack, INT_ATTACK)
+        Call MainTimer.SetInterval(TimersIndex.Work, INT_WORK)
+        Call MainTimer.SetInterval(TimersIndex.UseItemWithU, INT_USEITEMU)
+        Call MainTimer.SetInterval(TimersIndex.UseItemWithDblClick, INT_USEITEMDCK)
+        Call MainTimer.SetInterval(TimersIndex.SendRPU, INT_SENTRPU)
+        Call MainTimer.SetInterval(TimersIndex.CastSpell, INT_CAST_SPELL)
+        Call MainTimer.SetInterval(TimersIndex.Arrows, INT_ARROWS)
+        Call MainTimer.SetInterval(TimersIndex.CastAttack, INT_CAST_ATTACK)
+        
     frmCargando.SetAddWith 15
+    
+        
+         
+        'Init timers
+         Call MainTimer.Start(TimersIndex.Attack)
+         Call MainTimer.Start(TimersIndex.Work)
+         Call MainTimer.Start(TimersIndex.UseItemWithU)
+         Call MainTimer.Start(TimersIndex.UseItemWithDblClick)
+         Call MainTimer.Start(TimersIndex.SendRPU)
+         Call MainTimer.Start(TimersIndex.CastSpell)
+         Call MainTimer.Start(TimersIndex.Arrows)
+         Call MainTimer.Start(TimersIndex.CastAttack)
+         
     frmCargando.SetAddWith 10
     frmCargando.Picture = LoadInterface("iniciando")
     frmCargando.picLoad.Visible = False
@@ -349,13 +366,39 @@ Sub Main()
 
     thFPSAndHour = SetTimer(0, 0, 1000, AddressOf Timer_HoraAndFPS)
     
-    thUpdatePosition = SetTimer(0, 0, 10, AddressOf WriteRequestPositionUpdate)
-   
-    thDrawGame = SetTimer(0, 0, 1, AddressOf drawGame)
     
-    thFlushBuffer = SetTimer(0, 0, 1, AddressOf FlushBuffer)
+    Call TileEngine.Map_Load(1)
     
-
+    Call Timer_HoraAndFPS
+    Do While prgRun
+        If IsAppActive Then
+            If frmMain.Visible Then
+                Call TileEngine.Engine_Render
+                Call CheckKeys
+                
+                If RenderInv Then
+                    TileEngine.Inventory_Render
+                End If
+            End If
+        Else
+            If frmMain.Visible Then
+                RenderInv = True
+            End If
+            
+            Sleep 100
+        End If
+'Call outgoingData.ReadASCIIStringFixed(outgoingData.length)
+                FlushBuffer
+        DoEvents
+    Loop
+    
+    Call CloseClient
+    
+    Exit Sub
+Err:
+   ' LogError Err.Description & " Numero " & Err.Number
+    Resume Next
+    
 End Sub
 
 Private Sub InicializarVariables()
@@ -365,6 +408,7 @@ Private Sub InicializarVariables()
     Set Inventario = New clsGrapchicalInventory
     Set incomingData = New clsByteQueue
     Set outgoingData = New clsByteQueue
+    Set MainTimer = New clsTimer
     Set CustomKeys = New clsCustomKeys
     Set cCursores = New clsCursor
     
@@ -477,8 +521,6 @@ Private Sub InicializarVariables()
     'Musica inicial mp3
     MIDI_ACTIVATE = IIf(FileExist(resource_path & "Music\01.mp3", vbNormal), 0, 1)
     
-    estaHabilitadoParaCaminar = True
-    PuedeRecibirPaquetes = True
 End Sub
 
 ''
@@ -500,15 +542,13 @@ Public Sub CloseClient()
     Set CustomKeys = Nothing
     Set Audio = Nothing
     Set Inventario = Nothing
+    Set MainTimer = Nothing
     Set incomingData = Nothing
     Set outgoingData = Nothing
     
     Call UnloadAllForms
     
     KillTimer 0, thFPSAndHour
-    KillTimer 0, thUpdatePosition
-    KillTimer 0, thDrawGame
-    KillTimer 0, thFlushBuffer
     
     End
 End Sub
@@ -663,11 +703,6 @@ Public Function General_Locale_Name_Obj(ByVal num As Long) As String
         Exit Function
     End If
     
-    If num > UBound(objs) Then
-        General_Locale_Name_Obj = ""
-        Exit Function
-    End If
-    
     General_Locale_Name_Obj = objs(num).name
 End Function
 Public Sub LoadLocales()
@@ -741,52 +776,14 @@ Public Sub LoadLocales()
     '***********************************************
 
     '***********************************************
+    Extract_File Scripts, "table.ind", resource_path
     
+    f = FreeFile
+    Open resource_path & "table.ind" For Binary As #f
+        Get #f, , MapTable
+    Close #f
     
-    'Extract_File Scripts, "datosMundo.dat", resource_path
-    
-    Dim numeroColumnas As Integer
-    Dim numeroFilas As Integer
-    
-    Dim linea As String
-    
-    Open resource_path & "datosMundo.txt" For Input As #1
-        
-        Line Input #1, linea
-        numeroFilas = val(linea)
-        Line Input #1, linea
-        numeroColumnas = val(linea)
-        
-        ReDim MapTable(1 To numeroColumnas, 1 To numeroFilas) As String
-        ReDim MapNameTable(1 To numeroColumnas, 1 To numeroFilas) As String
-        
-        Dim Y As Integer
-        Dim X As Integer
-        
-        For Y = 1 To numeroFilas
-            For X = 1 To numeroColumnas
-                Line Input #1, linea
-                MapTable(X, Y) = linea
-                Line Input #1, linea
-                MapNameTable(X, Y) = linea
-            Next X
-        Next Y
-        
-    Close #1
-    
-    'Delete_File resource_path & "datosMundo.txt"
-    
-    '***********************************************
-    
-    
-    'Extract_File Scripts, "table.ind", resource_path
-    
-    'f = FreeFile
-    'Open resource_path & "table.ind" For Binary As #f
-    '    Get #f, , MapTable
-    'Close #f
-    
-    'Delete_File resource_path & "table.ind"
+    Delete_File resource_path & "table.ind"
     '***********************************************
 
     '***********************************************
@@ -1035,7 +1032,7 @@ Public Sub SaveConfig()
     
     'SACAR DESPUES es para testear la sincronizacion vertical para FPS mas altos
     ' JOSE CASTELLI
-    'Sinc = 0
+ 'Sinc = 0
     
 End Sub
 Public Sub LoadConfigDefault()
@@ -1090,7 +1087,7 @@ Public Sub LoadConfig()
         Get #f, , ChatGlobal
     Close #f
     
-    'Sinc = 0
+    Sinc = 0
  
 End Sub
 Public Sub LoadMacros()
@@ -1221,7 +1218,7 @@ Open resource_path & "graficos.ind" For Binary Access Read As #f
     
 Close #f
 
-'Delete_File resource_path & "Graficos.ind"
+Delete_File resource_path & "Graficos.ind"
 If FileExist(resource_path & "Graficos.ind", vbNormal) Then Kill resource_path & "Graficos.ind"
 
 Extract_File Scripts, "minimap.dat", resource_path
@@ -1237,14 +1234,14 @@ Open resource_path & "minimap.dat" For Binary As #f
     Next count
 Close #f
 
-'Delete_File resource_path & "minimap.dat"
+Delete_File resource_path & "minimap.dat"
 If FileExist(resource_path & "minimap.dat", vbNormal) Then Kill resource_path & "minimap.dat"
 
 Exit Sub
 
 ErrorHandler:
     Close #1
-    'MsgBox "Error al cargar el recurso de índice de gráficos: " & err.Description & " (" & Grh & ")", vbCritical, "Error al cargar"
+    MsgBox "Error al cargar el recurso de índice de gráficos: " & Err.Description & " (" & Grh & ")", vbCritical, "Error al cargar"
 
 End Sub
 
@@ -1331,7 +1328,7 @@ Public Sub CargarParticulas()
     Next loopc
     
     Set Leer = Nothing
-    'Delete_File resource_path & "particulas.ini"
+    Delete_File resource_path & "particulas.ini"
     If FileExist(resource_path & "particulas.ini", vbNormal) Then Kill resource_path & "particulas.ini"
     
 
@@ -1360,11 +1357,6 @@ Public Sub Timer_HoraAndFPS()
         End If
     End If
 End Sub
-
-
-
-
-
 Function Generate_Char_Status(ByVal PercVida As Long, ByVal Paralizado As Byte, ByVal Inmovilizado As Byte, ByVal Envenenado As Byte, Optional ByVal Trabajando As Byte = 0, Optional ByVal Silenciado As Byte = 0, Optional ByVal Ciego As Byte = 0, Optional ByVal Incinerado As Byte = 0, Optional ByVal Transformado As Byte = 0, Optional ByVal Comerciando As Byte = 0, Optional ByVal Inactivo As Byte = 0) As String
 
 If PercVida <> -1 Then

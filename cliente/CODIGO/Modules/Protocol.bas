@@ -10,18 +10,6 @@ Attribute VB_Name = "Protocol"
 '************************************************************************
 Option Explicit
 
-
-
-Private Declare Function SendMessage Lib "user32.dll" Alias _
-   "SendMessageA" (ByVal hwnd As Long, ByVal wMsg As Long, _
-   ByVal wParam As Long, ByVal lParam As Long) As Long
-
-Private Const WM_PAINT = &HF
-Private Const WM_PRINT = &H317
-Private Const PRF_CLIENT = &H4&    ' Draw the window's client area
-Private Const PRF_CHILDREN = &H10& ' Draw all visible child
-Private Const PRF_OWNED = &H20&    ' Draw all owned windows
-
 ''
 ' TODO : /BANIP y /UNBANIP ya no trabajan con nicks. Esto lo puede mentir en forma local el cliente con un paquete a NickToIp
 
@@ -177,7 +165,6 @@ Private Enum ServerPacketID
     CharMsgStatus           ' 117
     MensajeSigno            ' 118
     Disconnect2             ' 119
-    KeepAlive               ' 120
 End Enum
 
 Private Enum ClientPacketID
@@ -571,18 +558,15 @@ Public Sub HandleIncomingData()
 '
 '***************************************************
 
+On Error Resume Next
+
+    Dim package As Byte
     
-    'Open "C:\Users\jose-\Desktop\ServerVB.txt" For Output As fTxt
-    '    For a = 1 To incomingData.length
-            'Write #fTxt, incomingData.(a)
-    '    Next a
-    'Close fTxt
+    package = incomingData.PeekByte()
 
-    Dim PeekByte As Byte
 
-    PeekByte = incomingData.PeekByte()
-
-    Select Case PeekByte
+    Select Case package
+    
     
     
         Case ServerPacketID.Logged                  ' LOGGED
@@ -950,15 +934,18 @@ Public Sub HandleIncomingData()
         Case ServerPacketID.Disconnect2
             Call HandleDisconnect2
             
-        Case ServerPacketID.KeepAlive
-            Call incomingData.ReadByte
             
         Case Else
-            err.Number = incomingData.NotEnoughDataErrCode
+            'ERROR : Abort!
             Exit Sub
 
     End Select
     
+    'Done with this packet, move on to next one
+    If incomingData.length > 0 And Err.Number <> incomingData.NotEnoughDataErrCode Then
+        Err.Clear
+        Call HandleIncomingData
+    End If
 End Sub
 
 ''
@@ -972,6 +959,8 @@ Private Sub HandleLogged()
 '***************************************************
     'Remove packet ID
     Call incomingData.ReadByte
+    
+    Security.Redundance = incomingData.ReadByte()
     
     ' Variable initialization
     Nombres = True
@@ -1008,7 +997,7 @@ Private Sub HandleRemoveCharDialog()
 '***************************************************
     'Check if the packet is complete
     If incomingData.length < 3 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -1092,7 +1081,6 @@ Private Sub HandleDisconnect2()
    
     frmMain.Socket1.Disconnect
     frmConnect.Visible = True
-    estaHabilitadoParaCaminar = True
     frmPanelAccount.Visible = False
     If frmMain.Visible = True Then
     Unload frmMain
@@ -1480,7 +1468,7 @@ Private Sub HandleUpdateSta()
 '***************************************************
     'Check packet is complete
     If incomingData.length < 3 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -1504,7 +1492,7 @@ Private Sub HandleUpdateMana()
 '***************************************************
     'Check packet is complete
     If incomingData.length < 3 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -1531,8 +1519,8 @@ Private Sub HandleUpdateHungerAndThirst()
 'Last Modification: 05/17/06
 '
 '***************************************************
-    If incomingData.length < 3 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+    If incomingData.length < 5 Then
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -1561,7 +1549,7 @@ Private Sub HandleUpdateHP()
 '***************************************************
     'Check packet is complete
     If incomingData.length < 3 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -1593,7 +1581,7 @@ Private Sub HandleUpdateGold()
 '***************************************************
     'Check packet is complete
     If incomingData.length < 5 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -1617,7 +1605,7 @@ Private Sub HandleUpdateExp()
 '***************************************************
     'Check packet is complete
     If incomingData.length < 5 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -1651,7 +1639,7 @@ Private Sub HandleChangeMap()
 '
 '***************************************************
     If incomingData.length < 5 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -1663,10 +1651,7 @@ Private Sub HandleChangeMap()
     Call incomingData.ReadInteger
 
     Call TileEngine.Map_Load(UserMap)
-    
 End Sub
-
-
 
 ''
 ' Handles the PosUpdate message.
@@ -1677,40 +1662,22 @@ Private Sub HandlePosUpdate()
 'Last Modification: 05/17/06
 '
 '***************************************************
-On Error GoTo ErrHandler:
-
     If incomingData.length < 3 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
-    
-    estaHabilitadoParaCaminar = True
     
     'Remove packet ID
     Call incomingData.ReadByte
     
     'Remove char from old position
-    'If MapData(UserPos.X, UserPos.Y).CharIndex = char_current Then
-        'MapData(UserPos.X, UserPos.Y).CharIndex = 0
-    'End If
-    
-    Dim nx As Byte
-    Dim ny As Byte
-    
-    nx = incomingData.ReadByte()
-    ny = incomingData.ReadByte()
-    
-    If UserPos.X = nx And UserPos.Y = ny Then
-        Exit Sub
+    If MapData(UserPos.X, UserPos.Y).CharIndex = char_current Then
+        MapData(UserPos.X, UserPos.Y).CharIndex = 0
     End If
     
     'Set new pos
-    UserPos.X = nx
-    UserPos.Y = ny
-    
-    If UserPos.X = 0 Or UserPos.Y = 0 Then Exit Sub
-    
-    
+    UserPos.X = incomingData.ReadByte()
+    UserPos.Y = incomingData.ReadByte()
     
     'Set char
     MapData(UserPos.X, UserPos.Y).CharIndex = char_current
@@ -1724,12 +1691,6 @@ On Error GoTo ErrHandler:
                 
     
     Call DibujarMiniMapPos
-    
-    Exit Sub
-    
-ErrHandler:
-    LogError (err.Description)
-    
 End Sub
 
 ''
@@ -1742,7 +1703,7 @@ Private Sub HandleNPCHitUser()
 '
 '***************************************************
     If incomingData.length < 4 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -1774,7 +1735,7 @@ Private Sub HandleUserHitNPC()
 '
 '***************************************************
     If incomingData.length < 5 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -1794,7 +1755,7 @@ Private Sub HandleUserAttackedSwing()
 '
 '***************************************************
     If incomingData.length < 3 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -1814,7 +1775,7 @@ Private Sub HandleUserHittedByUser()
 '
 '***************************************************
     If incomingData.length < 6 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -1851,7 +1812,7 @@ Private Sub HandleUserHittedUser()
 '
 '***************************************************
     If incomingData.length < 6 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -1888,7 +1849,7 @@ Private Sub HandleChatOverHead()
 '
 '***************************************************
     If incomingData.length < 8 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -1925,13 +1886,13 @@ On Error GoTo ErrHandler
         If Trim(chat) <> "" Then
 
             If charlist(CharIndex).Priv = 1 Then 'Rene
-                Call AddtoRichTextBox(frmMain.RecChat, "[" & name & "] " & chat, 153, 153, 153, 0, 0)
+                Call AddtoRichTextBox(frmMain.RecChat, "[" & name & "] " & chat, 114, 115, 108, 0, 1)
             ElseIf charlist(CharIndex).Priv = 2 Then 'Impe
-                Call AddtoRichTextBox(frmMain.RecChat, "[" & name & "] " & chat, 0, 120, 250, 0, 0)
+                Call AddtoRichTextBox(frmMain.RecChat, "[" & name & "] " & chat, 0, 80, 200, 0, 1)
             ElseIf charlist(CharIndex).Priv = 4 Then 'Repu
-                Call AddtoRichTextBox(frmMain.RecChat, "[" & name & "] " & chat, 248, 147, 34, 0, 0)
+                Call AddtoRichTextBox(frmMain.RecChat, "[" & name & "] " & chat, 243, 147, 1, 0, 1)
             ElseIf charlist(CharIndex).Priv = 3 Then 'Caos
-                Call AddtoRichTextBox(frmMain.RecChat, "[" & name & "] " & chat, 235, 0, 0, 0, 0)
+                Call AddtoRichTextBox(frmMain.RecChat, "[" & name & "] " & chat, 197, 0, 5, 0, 1)
                 
             'Add Marius Lideres faccionarios
             ElseIf charlist(CharIndex).Priv = 9 Then 'Lider Impe
@@ -1942,15 +1903,15 @@ On Error GoTo ErrHandler
                 Call AddtoRichTextBox(frmMain.RecChat, "[" & name & "] " & chat, 197, 0, 5, 1, 1)
             '\Add
             ElseIf charlist(CharIndex).Priv = 5 Then ' conse
-                Call AddtoRichTextBox(frmMain.RecChat, "[" & name & "] " & chat, 0, 175, 0, 0, 0)
+                Call AddtoRichTextBox(frmMain.RecChat, "[" & name & "] " & chat, 0, 160, 0, 1, 1)
             ElseIf charlist(CharIndex).Priv = 6 Then 'semi
-                Call AddtoRichTextBox(frmMain.RecChat, "[" & name & "] " & chat, 0, 175, 0, 0, 0)
+                Call AddtoRichTextBox(frmMain.RecChat, "[" & name & "] " & chat, 0, 160, 0, 1, 1)
             ElseIf charlist(CharIndex).Priv = 7 Then 'dios
-                Call AddtoRichTextBox(frmMain.RecChat, "[" & name & "] " & chat, 0, 175, 0, 0, 0)
+                Call AddtoRichTextBox(frmMain.RecChat, "[" & name & "] " & chat, 0, 160, 0, 1, 1)
             ElseIf charlist(CharIndex).Priv = 8 Then ' admin
-                Call AddtoRichTextBox(frmMain.RecChat, "[" & name & "] " & chat, 0, 175, 0, 0, 0)
+                Call AddtoRichTextBox(frmMain.RecChat, "[" & name & "] " & chat, 0, 160, 0, 1, 1)
             Else
-                Call AddtoRichTextBox(frmMain.RecChat, "[" & name & "] " & chat, 255, 255, 255, 0, 0)
+                Call AddtoRichTextBox(frmMain.RecChat, "[" & name & "] " & chat, 255, 255, 255, 0, 1)
             End If
         End If
     End If
@@ -1958,18 +1919,16 @@ On Error GoTo ErrHandler
     'If we got here then packet is complete, copy data back to original queue
     Call incomingData.CopyBuffer(buffer)
 
-    Exit Sub
-
 ErrHandler:
     Dim error As Long
-    error = err.Number
+    error = Err.Number
 On Error GoTo 0
     
     'Destroy auxiliar buffer
     Set buffer = Nothing
     
     If error <> 0 Then _
-        err.Raise error
+        Err.Raise error
 End Sub
 
 ''
@@ -1982,7 +1941,7 @@ Private Sub HandleConsoleMessage()
 '
 '***************************************************
     If incomingData.length < 4 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -2063,14 +2022,14 @@ On Error GoTo ErrHandler
     
 ErrHandler:
     Dim error As Long
-    error = err.Number
+    error = Err.Number
 On Error GoTo 0
     
     'Destroy auxiliar buffer
     Set buffer = Nothing
 
     If error <> 0 Then _
-        err.Raise error
+        Err.Raise error
 End Sub
 
 ''
@@ -2083,7 +2042,7 @@ Private Sub HandleGuildChat()
 '
 '***************************************************
     If incomingData.length < 3 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -2140,14 +2099,14 @@ On Error GoTo ErrHandler
     
 ErrHandler:
     Dim error As Long
-    error = err.Number
+    error = Err.Number
 On Error GoTo 0
     
     'Destroy auxiliar buffer
     Set buffer = Nothing
 
     If error <> 0 Then _
-        err.Raise error
+        Err.Raise error
 End Sub
 
 ''
@@ -2160,7 +2119,7 @@ Private Sub HandleShowMessageBox()
 '
 '***************************************************
     If incomingData.length < 3 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -2187,14 +2146,14 @@ On Error GoTo ErrHandler
     
 ErrHandler:
     Dim error As Long
-    error = err.Number
+    error = Err.Number
 On Error GoTo 0
     
     'Destroy auxiliar buffer
     Set buffer = Nothing
 
     If error <> 0 Then _
-        err.Raise error
+        Err.Raise error
 End Sub
 
 ''
@@ -2207,7 +2166,7 @@ Private Sub HandleUserIndexInServer()
 '
 '***************************************************
     If incomingData.length < 3 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -2227,7 +2186,7 @@ Private Sub Handlechar_currentInServer()
 '
 '***************************************************
     If incomingData.length < 3 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -2258,7 +2217,7 @@ Private Sub HandleCharacterCreate()
 '
 '***************************************************
     If incomingData.length < 23 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -2324,17 +2283,16 @@ On Error GoTo ErrHandler
     'If we got here then packet is complete, copy data back to original queue
     Call incomingData.CopyBuffer(buffer)
     
-    Exit Sub
-    
 ErrHandler:
+    Dim error As Long
+    error = Err.Number
+On Error GoTo 0
     
     'Destroy auxiliar buffer
     Set buffer = Nothing
 
-    LogError (err.Description)
-    'If error <> 0 Then _
-    '    err.Raise error
-    
+    If error <> 0 Then _
+        Err.Raise error
 End Sub
 
 ''
@@ -2347,7 +2305,7 @@ Private Sub HandleCharacterRemove()
 '
 '***************************************************
     If incomingData.length < 3 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -2372,7 +2330,7 @@ Private Sub HandleCharacterMove()
 '
 '***************************************************
     If incomingData.length < 5 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -2384,7 +2342,6 @@ Private Sub HandleCharacterMove()
     Dim Y As Byte
     
     CharIndex = incomingData.ReadInteger() Xor (13246 Xor 789)
-    
     X = incomingData.ReadByte()
     Y = incomingData.ReadByte()
     
@@ -2402,14 +2359,11 @@ Private Sub HandleCharacterMove()
     End With
     
     Call TileEngine.Char_Move_Pos(CharIndex, X, Y)
-    
-        
-    
 End Sub
 Private Sub HandleForceCharMove()
     
     If incomingData.length < 2 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -2426,7 +2380,7 @@ Private Sub HandleForceCharMove()
 End Sub
 Sub HandleCharStatus()
     If incomingData.length < 4 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -2479,7 +2433,7 @@ Private Sub HandleCharacterChange()
 '
 '***************************************************
     If incomingData.length < 18 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -2548,7 +2502,7 @@ Private Sub HandleObjectCreate()
 '
 '***************************************************
     If incomingData.length < 6 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -2557,21 +2511,21 @@ Private Sub HandleObjectCreate()
     
     Dim X As Byte
     Dim Y As Byte
-    Dim obj As Integer
+    Dim Obj As Integer
     Dim tipe As Byte
     Dim Amount As Integer
     
     X = incomingData.ReadByte()
     Y = incomingData.ReadByte()
     
-    obj = incomingData.ReadInteger()
+    Obj = incomingData.ReadInteger()
     tipe = incomingData.ReadByte()
     Amount = incomingData.ReadInteger
     
-    If obj = 378 Then
+    If Obj = 378 Then
         Call TileEngine.General_Particle_Create(34, X, Y)
     Else
-        TileEngine.Map_Obj_Create X, Y, objs(obj).Grh, obj, tipe, Amount
+        TileEngine.Map_Obj_Create X, Y, objs(Obj).Grh, Obj, tipe, Amount
     End If
 End Sub
 
@@ -2579,9 +2533,13 @@ End Sub
 ' Handles the ObjectDelete message.
 
 Private Sub HandleObjectDelete()
-
+'***************************************************
+'Author: Juan Martín Sotuyo Dodero (Maraxus)
+'Last Modification: 05/17/06
+'
+'***************************************************
     If incomingData.length < 3 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -2594,22 +2552,13 @@ Private Sub HandleObjectDelete()
     X = incomingData.ReadByte()
     Y = incomingData.ReadByte()
     
-    If X = 0 Or Y = 0 Then Exit Sub
-    
-    On Error GoTo ErrHandler:
-    
-        If MapData(X, Y).particle_group_index > 0 Then
-            If TileEngine.Particle_Get_Type(MapData(X, Y).particle_group_index) = 16 Then
-                Call TileEngine.Particle_Group_Remove(MapData(X, Y).particle_group_index)
-            End If
+    If MapData(X, Y).particle_group_index > 0 Then
+        If TileEngine.Particle_Get_Type(MapData(X, Y).particle_group_index) = 16 Then
+            Call TileEngine.Particle_Group_Remove(MapData(X, Y).particle_group_index)
         End If
-        
-        TileEngine.Map_Obj_Delete X, Y
+    End If
     
-    Exit Sub
-    
-ErrHandler:
-    Debug.Print err.Description
+    TileEngine.Map_Obj_Delete X, Y
 
 End Sub
 
@@ -2623,7 +2572,7 @@ Private Sub HandleBlockPosition()
 '
 '***************************************************
     If incomingData.length < 4 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -2653,7 +2602,7 @@ Private Sub HandlePlayMusic()
 '
 '***************************************************
     If incomingData.length < 4 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -2683,7 +2632,7 @@ Private Sub HandlePlayWave()
 'Added support for 3D Sounds.
 '***************************************************
     If incomingData.length < 3 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -2717,7 +2666,7 @@ Private Sub HandleGuildList()
 '
 '***************************************************
     If incomingData.length < 3 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -2747,14 +2696,14 @@ On Error GoTo ErrHandler
     
 ErrHandler:
     Dim error As Long
-    error = err.Number
+    error = Err.Number
 On Error GoTo 0
     
     'Destroy auxiliar buffer
     Set buffer = Nothing
 
     If error <> 0 Then _
-        err.Raise error
+        Err.Raise error
 End Sub
 
 ''
@@ -2767,7 +2716,7 @@ Private Sub HandleAreaChanged()
 '
 '***************************************************
     If incomingData.length < 3 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -2780,8 +2729,7 @@ Private Sub HandleAreaChanged()
     X = incomingData.ReadByte()
     Y = incomingData.ReadByte()
         
-   Call TileEngine.Map_Change_Area(X, Y)
-    
+    Call TileEngine.Map_Change_Area(X, Y)
 End Sub
 
 ''
@@ -2821,7 +2769,7 @@ Private Sub HandleCreateFX()
 '
 '***************************************************
     If incomingData.length < 7 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -2849,7 +2797,7 @@ Private Sub HandleUpdateUserStats()
 '
 '***************************************************
     If incomingData.length < 26 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -2917,7 +2865,7 @@ Private Sub HandleWorkRequestTarget()
 '
 '***************************************************
     If incomingData.length < 2 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -3013,11 +2961,16 @@ On Error GoTo ErrHandler
     'If we got here then packet is complete, copy data back to original queue
     Call incomingData.CopyBuffer(buffer)
     
-    Exit Sub
-    
 ErrHandler:
-    LogError "Error en HandleChangeInventorySlot " & err.Description
+    Dim error As Long
+    error = Err.Number
+On Error GoTo 0
     
+    'Destroy auxiliar buffer
+    Set buffer = Nothing
+
+    If error <> 0 Then _
+        Err.Raise error
 End Sub
 
 ''
@@ -3062,14 +3015,14 @@ On Error GoTo ErrHandler
     
 ErrHandler:
     Dim error As Long
-    error = err.Number
+    error = Err.Number
 On Error GoTo 0
     
     'Destroy auxiliar buffer
     Set buffer = Nothing
 
     If error <> 0 Then _
-        err.Raise error
+        Err.Raise error
 End Sub
 
 ''
@@ -3081,8 +3034,8 @@ Private Sub HandleChangeSpellSlot()
 'Last Modification: 05/17/06
 '
 '***************************************************
-    If incomingData.length < 4 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+    If incomingData.length < 6 Then
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -3110,14 +3063,14 @@ On Error GoTo ErrHandler
     
 ErrHandler:
     Dim error As Long
-    error = err.Number
+    error = Err.Number
 On Error GoTo 0
     
     'Destroy auxiliar buffer
     Set buffer = Nothing
 
     If error <> 0 Then _
-        err.Raise error
+        Err.Raise error
 End Sub
 
 ''
@@ -3130,7 +3083,7 @@ Private Sub HandleAtributes()
 '
 '***************************************************
     If incomingData.length < 1 + NUMATRIBUTES Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -3155,8 +3108,7 @@ Private Sub HandleAtributes()
             End If
         End With
     Else
-        frmEstadisticas.Iniciar_Labels
-        frmEstadisticas.Show , frmMain
+        LlegaronEstadisticas = True
     End If
 End Sub
 
@@ -3170,7 +3122,7 @@ Private Sub HandleBlacksmithWeapons()
 '
 '***************************************************
     If incomingData.length < 3 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -3209,14 +3161,14 @@ On Error GoTo ErrHandler
     
 ErrHandler:
     Dim error As Long
-    error = err.Number
+    error = Err.Number
 On Error GoTo 0
     
     'Destroy auxiliar buffer
     Set buffer = Nothing
 
     If error <> 0 Then _
-        err.Raise error
+        Err.Raise error
 End Sub
 
 ''
@@ -3229,7 +3181,7 @@ Private Sub HandleBlacksmithArmors()
 '
 '***************************************************
     If incomingData.length < 3 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -3268,14 +3220,14 @@ On Error GoTo ErrHandler
     
 ErrHandler:
     Dim error As Long
-    error = err.Number
+    error = Err.Number
 On Error GoTo 0
     
     'Destroy auxiliar buffer
     Set buffer = Nothing
 
     If error <> 0 Then _
-        err.Raise error
+        Err.Raise error
 End Sub
 
 ''
@@ -3288,7 +3240,7 @@ Private Sub HandleCarpenterObjects()
 '
 '***************************************************
     If incomingData.length < 3 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -3325,14 +3277,14 @@ On Error GoTo ErrHandler
     
 ErrHandler:
     Dim error As Long
-    error = err.Number
+    error = Err.Number
 On Error GoTo 0
     
     'Destroy auxiliar buffer
     Set buffer = Nothing
 
     If error <> 0 Then _
-        err.Raise error
+        Err.Raise error
 End Sub
 
 
@@ -3344,7 +3296,7 @@ Private Sub HandleAlquimiaObjects()
 '
 '***************************************************
     If incomingData.length < 3 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -3381,14 +3333,14 @@ On Error GoTo ErrHandler
     
 ErrHandler:
     Dim error As Long
-    error = err.Number
+    error = Err.Number
 On Error GoTo 0
     
     'Destroy auxiliar buffer
     Set buffer = Nothing
 
     If error <> 0 Then _
-        err.Raise error
+        Err.Raise error
 End Sub
 
 
@@ -3406,7 +3358,7 @@ Private Sub HandleSastreObjects()
       
     
     If incomingData.length < 4 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -3451,14 +3403,14 @@ On Error GoTo ErrHandler
     
 ErrHandler:
     Dim error As Long
-    error = err.Number
+    error = Err.Number
 On Error GoTo 0
     
     'Destroy auxiliar buffer
     Set buffer = Nothing
 
     If error <> 0 Then _
-        err.Raise error
+        Err.Raise error
 End Sub
 
 
@@ -3487,7 +3439,7 @@ Private Sub HandleErrorMessage()
 '
 '***************************************************
     If incomingData.length < 3 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -3506,14 +3458,14 @@ On Error GoTo ErrHandler
     
 ErrHandler:
     Dim error As Long
-    error = err.Number
+    error = Err.Number
 On Error GoTo 0
     
     'Destroy auxiliar buffer
     Set buffer = Nothing
 
     If error <> 0 Then _
-        err.Raise error
+        Err.Raise error
 End Sub
 
 ''
@@ -3556,7 +3508,7 @@ Private Sub HandleShowSignal()
 '
 '***************************************************
     If incomingData.length < 5 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -3579,14 +3531,14 @@ On Error GoTo ErrHandler
     
 ErrHandler:
     Dim error As Long
-    error = err.Number
+    error = Err.Number
 On Error GoTo 0
     
     'Destroy auxiliar buffer
     Set buffer = Nothing
 
     If error <> 0 Then _
-        err.Raise error
+        Err.Raise error
 End Sub
 
 ''
@@ -3630,18 +3582,16 @@ On Error GoTo ErrHandler
     'If we got here then packet is complete, copy data back to original queue
     Call incomingData.CopyBuffer(buffer)
     
-    Exit Sub
-    
 ErrHandler:
     Dim error As Long
-    error = err.Number
+    error = Err.Number
 On Error GoTo 0
     
     'Destroy auxiliar buffer
     Set buffer = Nothing
 
     If error <> 0 Then _
-        err.Raise error
+        Err.Raise error
 End Sub
 
 ''
@@ -3654,7 +3604,7 @@ Private Sub HandleMiniStats()
 '
 '***************************************************
     If incomingData.length < 20 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -3760,7 +3710,7 @@ Private Sub HandleAddForumMessage()
 '
 '***************************************************
     If incomingData.length < 5 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -3787,21 +3737,21 @@ On Error GoTo ErrHandler
     
 ErrHandler:
     Dim error As Long
-    error = err.Number
+    error = Err.Number
 On Error GoTo 0
     
     'Destroy auxiliar buffer
     Set buffer = Nothing
 
     If error <> 0 Then _
-        err.Raise error
+        Err.Raise error
 End Sub
 
 
 
 Private Sub HandleAddCorreoMessage()
     If incomingData.length < 8 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -3841,14 +3791,14 @@ On Error GoTo ErrHandler
     
 ErrHandler:
     Dim error As Long
-    error = err.Number
+    error = Err.Number
 On Error GoTo 0
     
     'Destroy auxiliar buffer
     Set buffer = Nothing
 
     If error <> 0 Then _
-        err.Raise error
+        Err.Raise error
 End Sub
 
 
@@ -3884,8 +3834,6 @@ Private Sub HandleShowCorreoForm()
         frmCorreo.Show , frmMain
     End If
     
-    frmCorreo.actualizar_inventario
-    
     Dim i As Long
     For i = 1 To 20
         If Correos(i).De <> "" Then
@@ -3907,7 +3855,7 @@ Private Sub HandleSetInvisible()
 '
 '***************************************************
     If incomingData.length < 4 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -3977,7 +3925,7 @@ Private Sub HandleSendSkills()
 '
 '***************************************************
     If incomingData.length < 1 + NUMSKILLS Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -4003,7 +3951,7 @@ Private Sub HandleTrainerCreatureList()
 '
 '***************************************************
     If incomingData.length < 3 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -4030,14 +3978,14 @@ On Error GoTo ErrHandler
     
 ErrHandler:
     Dim error As Long
-    error = err.Number
+    error = Err.Number
 On Error GoTo 0
     
     'Destroy auxiliar buffer
     Set buffer = Nothing
 
     If error <> 0 Then _
-        err.Raise error
+        Err.Raise error
 End Sub
 
 
@@ -4050,7 +3998,7 @@ Private Sub HandleCharacterInfo()
 '
 '***************************************************
     If incomingData.length < 34 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -4121,14 +4069,14 @@ On Error GoTo ErrHandler
     
 ErrHandler:
     Dim error As Long
-    error = err.Number
+    error = Err.Number
 On Error GoTo 0
     
     'Destroy auxiliar buffer
     Set buffer = Nothing
 
     If error <> 0 Then _
-        err.Raise error
+        Err.Raise error
 End Sub
 
 ''
@@ -4141,7 +4089,7 @@ Private Sub HandleGuildLeaderInfo()
 '
 '***************************************************
     If incomingData.length < 9 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -4198,14 +4146,14 @@ On Error GoTo ErrHandler
     
 ErrHandler:
     Dim error As Long
-    error = err.Number
+    error = Err.Number
 On Error GoTo 0
     
     'Destroy auxiliar buffer
     Set buffer = Nothing
 
     If error <> 0 Then _
-        err.Raise error
+        Err.Raise error
 End Sub
 
 ''
@@ -4218,7 +4166,7 @@ Private Sub HandleGuildDetails()
 '
 '***************************************************
     If incomingData.length < 26 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -4260,14 +4208,14 @@ On Error GoTo ErrHandler
     
 ErrHandler:
     Dim error As Long
-    error = err.Number
+    error = Err.Number
 On Error GoTo 0
     
     'Destroy auxiliar buffer
     Set buffer = Nothing
 
     If error <> 0 Then _
-        err.Raise error
+        Err.Raise error
 End Sub
 
 ''
@@ -4311,7 +4259,7 @@ Private Sub HandleShowUserRequest()
 '
 '***************************************************
     If incomingData.length < 3 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -4331,14 +4279,14 @@ On Error GoTo ErrHandler
     
 ErrHandler:
     Dim error As Long
-    error = err.Number
+    error = Err.Number
 On Error GoTo 0
     
     'Destroy auxiliar buffer
     Set buffer = Nothing
 
     If error <> 0 Then _
-        err.Raise error
+        Err.Raise error
 End Sub
 
 ''
@@ -4455,14 +4403,14 @@ On Error GoTo ErrHandler
     
 ErrHandler:
     Dim error As Long
-    error = err.Number
+    error = Err.Number
 On Error GoTo 0
     
     'Destroy auxiliar buffer
     Set buffer = Nothing
 
     If error <> 0 Then _
-        err.Raise error
+        Err.Raise error
 End Sub
 
 
@@ -4476,7 +4424,7 @@ Private Sub HandleSpawnList()
 '
 '***************************************************
     If incomingData.length < 3 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -4503,14 +4451,14 @@ On Error GoTo ErrHandler
     
 ErrHandler:
     Dim error As Long
-    error = err.Number
+    error = Err.Number
 On Error GoTo 0
     
     'Destroy auxiliar buffer
     Set buffer = Nothing
 
     If error <> 0 Then _
-        err.Raise error
+        Err.Raise error
 End Sub
 ''
 ' Handles the SpawnList message.
@@ -4523,7 +4471,7 @@ Private Sub HandleShowSOSForm()
 '
 '***************************************************
     If incomingData.length < 3 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -4551,14 +4499,14 @@ On Error GoTo ErrHandler
     
 ErrHandler:
     Dim error As Long
-    error = err.Number
+    error = Err.Number
 On Error GoTo 0
     
     'Destroy auxiliar buffer
     Set buffer = Nothing
 
     If error <> 0 Then _
-        err.Raise error
+        Err.Raise error
 End Sub
 
 ''
@@ -4587,7 +4535,7 @@ Private Sub HandleUserNameList()
 '
 '***************************************************
     If incomingData.length < 3 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -4617,14 +4565,14 @@ On Error GoTo ErrHandler
     
 ErrHandler:
     Dim error As Long
-    error = err.Number
+    error = Err.Number
 On Error GoTo 0
     
     'Destroy auxiliar buffer
     Set buffer = Nothing
 
     If error <> 0 Then _
-        err.Raise error
+        Err.Raise error
 End Sub
 
 ''
@@ -4653,7 +4601,7 @@ Private Sub HandleUpdateTagAndStatus()
 '
 '***************************************************
     If incomingData.length < 6 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -4728,14 +4676,14 @@ On Error GoTo ErrHandler
     
 ErrHandler:
     Dim error As Long
-    error = err.Number
+    error = Err.Number
 On Error GoTo 0
     
     'Destroy auxiliar buffer
     Set buffer = Nothing
 
     If error <> 0 Then _
-        err.Raise error
+        Err.Raise error
 End Sub
 
 
@@ -4801,31 +4749,7 @@ Public Sub WriteRequestPositionUpdate()
 'Writes the "RequestPositionUpdate" message to the outgoing data buffer
 '***************************************************
     Call outgoingData.WriteByte(ClientPacketID.RequestPositionUpdate)
-            FlushBuffer
-        DoEvents
 End Sub
-
-Public Sub recieveData()
-    
-    'Dim RD As String
-    'Dim data() As Byte
-   '
-    'Call frmMain.Socket1.Read(RD)
-    'data = StrConv(RD, vbFromUnicode)
-    
-    'If RD = vbNullString Then Exit Sub
-
-
-   ' Call incomingData.WriteBlock(data)
-    
-   ' Do While incomingData.length > 0 And err.Number <> incomingData.NotEnoughDataErrCode
-   '     Call HandleIncomingData
-   ' Loop
-  
-
-End Sub
-
-
 
 ''
 ' Writes the "Attack" message to the outgoing data buffer.
@@ -5043,8 +4967,6 @@ Public Sub WriteLeftClick(ByVal X As Byte, ByVal Y As Byte)
         Call .WriteByte(X)
         Call .WriteByte(Y)
     End With
-                FlushBuffer
-        DoEvents
 End Sub
 
 ''
@@ -8289,7 +8211,7 @@ Public Sub WritePing()
     Call outgoingData.WriteByte(ClientPacketID.Ping)
     
     ' Avoid computing errors due to frame rate
-'Call FlushBuffer
+Call FlushBuffer
     DoEvents
     
     pingTime = 1
@@ -8301,21 +8223,22 @@ End Sub
 ' @param    UserIndex User whose outgoing data buffer will be flushed.
 
 Public Sub FlushBuffer()
-
-
+'***************************************************
+'Author: Juan Martín Sotuyo Dodero (Maraxus)
+'Last Modification: 05/17/06
+'Sends all data existing in the buffer
+'***************************************************
     Dim sndData As String
     
     With outgoingData
         If .length = 0 Then _
             Exit Sub
         
+        
         sndData = .ReadASCIIStringFixed(.length)
         
-        Call senddata(sndData)
-        
+        Call SendData(sndData)
     End With
-    
-    
 End Sub
 Sub Login()
 
@@ -8327,7 +8250,7 @@ Sub Login()
         Call WriteLoginAccount
     End If
     DoEvents
-    'Call FlushBuffer
+    Call FlushBuffer
     
    
 End Sub
@@ -8337,11 +8260,9 @@ End Sub
 '
 ' @param    sdData  The data to be sent to the server.
 
-Private Sub senddata(ByRef sdData As String)
+Private Sub SendData(ByRef sdData As String)
 
-  On Error GoTo error:
-  
-  
+    
     If Not frmMain.Socket1.IsWritable Then
    
         'Put data back in the bytequeue
@@ -8351,15 +8272,21 @@ Private Sub senddata(ByRef sdData As String)
     End If
     
     If Not frmMain.Socket1.Connected Then Exit Sub
- 
+
+
+    'Dim data() As Byte
+    'data = StrConv(sdData, vbFromUnicode)
+    'Security.NAC_E_Byte data, Security.Redundance
+    'sdData = StrConv(data, vbUnicode)
+    
+    
     Call frmMain.Socket1.Write(sdData, Len(sdData))
-
-'frmMain.sckClient.senddata sdData
-
+    
+    On Error GoTo error:
+        frmMain.Winsock1.SendData sdData
         Exit Sub
-        
 error:
-        LogError err.Description
+        MsgBox Err.Description
         
 End Sub
 Private Sub HandleParticle()
@@ -8427,7 +8354,7 @@ End Sub
 Public Sub HandleAddPj()
 
     If incomingData.length < 11 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -8451,8 +8378,6 @@ Public Sub HandleAddPj()
         
         tipPet = .ReadByte
     End With
-    
-    If Index > 7 Then Exit Sub
     
     cPJ(Index - 1).nombre = name
     cPJ(Index - 1).Head = Head
@@ -8517,7 +8442,7 @@ Public Sub WriteLoginAccount()
         Call .WriteByte(ClientPacketID.ConnectAccount)
         Call .WriteASCIIString(UserAccount)
         Call .WriteASCIIString(UserPassword)
-        Call .WriteByte(VersionCliente)
+        'Call .WriteByte(11)
     End With
 End Sub
 Public Sub WriteLoginNewAccount()
@@ -8658,7 +8583,7 @@ Private Sub HandleSubastRequest()
 End Sub
 Private Sub HandleHora()
     If incomingData.length < 3 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
    
@@ -8672,7 +8597,7 @@ Private Sub HandleHora()
 End Sub
 Private Sub HandleGrupo()
     If incomingData.length < 4 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -8683,7 +8608,7 @@ Private Sub HandleGrupo()
 End Sub
 Private Sub HandleGrupoForm()
     If incomingData.length < 4 Then
-        err.Raise incomingData.NotEnoughDataErrCode
+        Err.Raise incomingData.NotEnoughDataErrCode
         Exit Sub
     End If
     
@@ -8948,19 +8873,11 @@ Sub HandleCharMsgStatus()
     
         CharIndex = .ReadInteger
         btStatus = .ReadByte
-        
-        
         lngPorcVida = .ReadLong
         St1 = .ReadByte
         St2 = .ReadByte
-        
         btMatrimonioLen = .ReadByte
-        
-        
-        
         btClase = .ReadByte
-        
-        
         btNivel = .ReadByte
         btRaza = .ReadByte
         btDescLen = .ReadByte

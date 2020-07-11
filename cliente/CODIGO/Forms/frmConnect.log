@@ -1,23 +1,4 @@
-Line 30: Class InetCtlsObjects.Inet of control mInet was not a loaded control class.
-Line 79: Class SHDocVwCtl.WebBrowser of control WebBrowser1 was not a loaded control class.
-Line 33: The property name _ExtentX in mInet is invalid.
-Line 34: The property name _ExtentY in mInet is invalid.
-Line 35: The property name _Version in mInet is invalid.
-Line 86: The property name ExtentX in WebBrowser1 is invalid.
-Line 87: The property name ExtentY in WebBrowser1 is invalid.
-Line 88: The property name ViewMode in WebBrowser1 is invalid.
-Line 89: The property name Offline in WebBrowser1 is invalid.
-Line 90: The property name Silent in WebBrowser1 is invalid.
-Line 91: The property name RegisterAsBrowser in WebBrowser1 is invalid.
-Line 92: The property name RegisterAsDropTarget in WebBrowser1 is invalid.
-Line 93: The property name AutoArrange in WebBrowser1 is invalid.
-Line 94: The property name NoClientEdge in WebBrowser1 is invalid.
-Line 95: The property name AlignLeft in WebBrowser1 is invalid.
-Line 96: The property name NoWebView in WebBrowser1 is invalid.
-Line 97: The property name HideFileNames in WebBrowser1 is invalid.
-Line 98: The property name SingleClick in WebBrowser1 is invalid.
-Line 99: The property name SingleSelection in WebBrowser1 is invalid.
-Line 100: The property name NoFolders in WebBrowser1 is invalid.
-Line 101: The property name Transparent in WebBrowser1 is invalid.
-Line 102: The property name ViewID in WebBrowser1 is invalid.
-Line 103: The property name Location in WebBrowser1 is invalid.
+Línea 55: la clase InetCtlsObjects.Inet del control mInet no era una clase de control cargada.
+Línea 58: el nombre de la propiedad _ExtentX de mInet no es válido.
+Línea 59: el nombre de la propiedad _ExtentY de mInet no es válido.
+Línea 60: el nombre de la propiedad _Version de mInet no es válido.

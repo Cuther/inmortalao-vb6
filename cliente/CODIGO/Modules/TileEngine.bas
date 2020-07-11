@@ -473,21 +473,21 @@ On Error Resume Next
     
     DevType = D3DDEVTYPE_HAL
 
-    err.Clear
+    Err.Clear
     Set D3DDevice = D3D.CreateDevice(D3DADAPTER_DEFAULT, DevType, frmMain.MainViewPic.hwnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, D3DWindow)
 
-    If err.Number <> 0 Or D3DDevice Is Nothing Then
-        err.Clear
+    If Err.Number <> 0 Or D3DDevice Is Nothing Then
+        Err.Clear
         Set D3DDevice = D3D.CreateDevice(D3DADAPTER_DEFAULT, DevType, frmMain.MainViewPic.hwnd, D3DCREATE_MIXED_VERTEXPROCESSING, D3DWindow)
     End If
     
-    If err.Number <> 0 Or D3DDevice Is Nothing Then
-        err.Clear
+    If Err.Number <> 0 Or D3DDevice Is Nothing Then
+        Err.Clear
         Set D3DDevice = D3D.CreateDevice(D3DADAPTER_DEFAULT, DevType, frmMain.MainViewPic.hwnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING, D3DWindow)
     End If
                                                                                               
-    If err.Number <> 0 And D3DDevice Is Nothing Then
-        MsgBox "Hubo un error al intentar crear Device. Por favor contacte al administrador del juego y notifique el error:" & err.Description & " Number:" & err.Number, , "InmortalAO Engine"
+    If Err.Number <> 0 And D3DDevice Is Nothing Then
+        MsgBox "Hubo un error al intentar crear Device. Por favor contacte al administrador del juego y notifique el error:" & Err.Description & " Number:" & Err.Number, , "InmortalAO Engine"
         Engine_Device_Started = False
         Exit Function
     End If
@@ -589,36 +589,22 @@ Private Sub Draw_Grh(ByRef Grh As Grh, ByVal X As Integer, ByVal Y As Integer, B
 End Sub
 Public Sub Engine_Render()
 
-On Error Resume Next
-
 If char_current = 0 Then Exit Sub
 
 D3DDevice.Clear 0, ByVal 0, D3DCLEAR_TARGET, 0, 0, 0
 D3DDevice.BeginScene
     
-Meteo_Render
-Map_Render
-Sound_Render
+    Meteo_Render
+    Map_Render
+    Sound_Render
+    
 
 D3DDevice.EndScene
 D3DDevice.Present ByVal 0&, ByVal 0&, 0, ByVal 0&
 
 timerElapsedTime = Engine_GetElapsedTime()
 timerTicksPerFrame = timerElapsedTime * engineBaseSpeed
-
-Dim maxInteger As Integer
-maxInteger = 32000
-
-'If FramesPerSecCounter >= maxInteger Then
-'    FramesPerSecCounter = 0
-'Else
-    FramesPerSecCounter = FramesPerSecCounter + 1
-'End If
-
-Exit Sub
-
-'error:
- '   LogError "Error en Engine Render: " & err.Description
+FramesPerSecCounter = FramesPerSecCounter + 1
 
 End Sub
 Public Function Sound_Render()
@@ -803,8 +789,6 @@ Sub Map_Render()
     Dim Techos(0 To 3)      As Long
     Static OffsetCounterX   As Single
     Static OffsetCounterY   As Single
-    
- '   On Error GoTo ErrHandler
     
     If scroll_on Then
         If AddPosX <> 0 Then
@@ -1050,11 +1034,6 @@ Sub Map_Render()
     
     'If FPSFLAG Then
     Text_Render FPS & " FPS", 490, 10, Default_RGB
-
-'Exit Sub
-
-'ErrHandler:
- '   LogError ("Map Render: " & err.Description)
 
 End Sub
 
@@ -1822,8 +1801,6 @@ Function Char_Is_Montura(ByVal body As Integer) As Boolean
 End Function
 Public Sub Char_SetFx(ByVal CharIndex As Integer, ByVal FX As Integer, ByVal Loops As Integer)
 
-    If CharIndex = 0 Then Exit Sub
-
     With charlist(CharIndex)
         .fxIndex = FX
         
@@ -1851,7 +1828,7 @@ End Sub
 Public Sub Char_Move_Head(ByVal CharIndex As Integer, ByVal nHeading As E_Heading)
     Dim addX As Integer, addY As Integer
     Dim X As Integer, Y As Integer
-    Dim nx As Integer, ny As Integer
+    Dim nX As Integer, nY As Integer
     
     With charlist(CharIndex)
         X = .Pos.X
@@ -1874,17 +1851,17 @@ Public Sub Char_Move_Head(ByVal CharIndex As Integer, ByVal nHeading As E_Headin
                 addX = -1
         End Select
         
-        nx = X + addX
-        ny = Y + addY
-        If Map_Bounds(nx, ny) Then
+        nX = X + addX
+        nY = Y + addY
+        If Map_Bounds(nX, nY) Then
             MapData(X, Y).CharIndex = 0
             
-            MapData(nx, ny).CharIndex = CharIndex
+            MapData(nX, nY).CharIndex = CharIndex
             
-            .Pos.X = nx
-            .Pos.Y = ny
+            .Pos.X = nX
+            .Pos.Y = nY
                         
-            If MapData(nx, ny).ObjGrh.grhindex = 26940 Then
+            If MapData(nX, nY).ObjGrh.grhindex = 26940 Then
                 .heading = 1
                 under_stair = True
             Else
@@ -1906,7 +1883,7 @@ Public Sub Char_Move_Head(ByVal CharIndex As Integer, ByVal nHeading As E_Headin
     If UserEstado <> 1 Then Call TileEngine.Char_Pasos_Render(CharIndex)
     
     'areas viejos
-    If (ny < MinLimiteY) Or (ny > MaxLimiteY) Or (nx < MinLimiteX) Or (nx > MaxLimiteX) Then
+    If (nY < MinLimiteY) Or (nY > MaxLimiteY) Or (nX < MinLimiteX) Or (nX > MaxLimiteX) Then
         Call Char_Remove(CharIndex)
     End If
 End Sub
@@ -2038,7 +2015,7 @@ Open resource_path & "mapa" & MapRoute & ".csm" For Binary Access Read As fh
     
     If Client_Mode = True Then
         Close #fh
-        'Delete_File resource_path & "mapa" & MapRoute & ".csm"
+        Delete_File resource_path & "mapa" & MapRoute & ".csm"
         If FileExist(resource_path & "mapa" & MapRoute & ".csm", vbNormal) Then Kill resource_path & "mapa" & MapRoute & ".csm"
         Exit Sub
     End If
@@ -2145,7 +2122,7 @@ Open resource_path & "mapa" & MapRoute & ".csm" For Binary Access Read As fh
 
 Close fh
     
-    'Delete_File resource_path & "mapa" & MapRoute & ".csm"
+    Delete_File resource_path & "mapa" & MapRoute & ".csm"
     If FileExist(resource_path & "mapa" & MapRoute & ".csm", vbNormal) Then Kill resource_path & "mapa" & MapRoute & ".csm"
     
 
@@ -2204,17 +2181,12 @@ Close fh
         Next map_x
     Next map_y
 
-
-
 Exit Sub
 
 ErrorHandler:
     If fh <> 0 Then Close fh
 End Sub
-
-
-
-Public Sub Char_Move_Pos(ByVal CharIndex As Integer, ByVal nx As Integer, ByVal ny As Integer)
+Public Sub Char_Move_Pos(ByVal CharIndex As Integer, ByVal nX As Integer, ByVal nY As Integer)
 On Error Resume Next
     Dim X As Integer
     Dim Y As Integer
@@ -2227,13 +2199,13 @@ On Error Resume Next
         Y = .Pos.Y
         
         If X < 1 Or Y < 1 Or X > 100 Or Y > 100 Then
-            .Pos.X = nx
-            .Pos.Y = ny
+            .Pos.X = nX
+            .Pos.Y = nY
             Exit Sub
         End If
         
-        addX = nx - X
-        addY = ny - Y
+        addX = nX - X
+        addY = nY - Y
         
         If Sgn(addX) = 1 Then
             nHeading = E_Heading.EAST
@@ -2249,9 +2221,9 @@ On Error Resume Next
             MapData(X, Y).CharIndex = 0
         End If
         
-        MapData(nx, ny).CharIndex = CharIndex
-        .Pos.X = nx
-        .Pos.Y = ny
+        MapData(nX, nY).CharIndex = CharIndex
+        .Pos.X = nX
+        .Pos.Y = nY
         
         
         .ScrollDirectionX = Sgn(addX)
@@ -2262,13 +2234,12 @@ On Error Resume Next
         
         .Moving = 1
 
-        If MapData(nx, ny).ObjGrh.grhindex = 26940 Then
+        If MapData(nX, nY).ObjGrh.grhindex = 26940 Then
             .heading = 1
         Else
             .heading = nHeading
         End If
     End With
-    
     
 End Sub
 
@@ -2280,17 +2251,7 @@ Dim buf As D3DXBuffer
     D3DX.BufferGetData buf, 0, 4, 1, Engine_FToDW
 End Function
 
-
-Public Sub DecideIfRenderInventory()
-
-    If RenderInv Or activateTempDrawInv Then
-        TileEngine.Inventory_Render
-    End If
-    
-End Sub
-
 Public Sub Inventory_Render()
-On Error Resume Next
     Static re As RECT
     re.Left = 0
     re.Top = 0
@@ -2304,7 +2265,7 @@ On Error Resume Next
     D3DDevice.Present re, ByVal 0, frmMain.picInv.hwnd, ByVal 0
 End Sub
 Public Sub Draw_Grh_Hdc(ByVal desthDC As Long, ByVal Grh As Long, ByVal screen_x As Integer, ByVal screen_y As Integer)
-On Error GoTo err
+On Error GoTo Err
     Dim file_path As String
     Dim src_x As Integer
     Dim src_y As Integer
@@ -2343,8 +2304,8 @@ On Error GoTo err
     Call DeleteObject(SelectObject(hdcsrc, PrevObj))
     DeleteDC hdcsrc
     
-err:
-If err.Number = 481 Then MsgBox "Imposible cargar recurso error: " & "481"
+Err:
+If Err.Number = 481 Then MsgBox "Imposible cargar recurso error: " & "481"
 
 End Sub
 
@@ -3694,8 +3655,8 @@ Public Function Light_Move_By_Head(ByVal light_index As Long, ByVal heading As B
 '**************************************************************
     Dim map_x As Integer
     Dim map_y As Integer
-    Dim nx As Integer
-    Dim ny As Integer
+    Dim nX As Integer
+    Dim nY As Integer
     
     'Check for valid heading
     If heading < 1 Or heading > 8 Then
@@ -3709,19 +3670,19 @@ Public Function Light_Move_By_Head(ByVal light_index As Long, ByVal heading As B
         map_x = light_list(light_index).map_x
         map_y = light_list(light_index).map_y
         
-        nx = map_x
-        ny = map_y
+        nX = map_x
+        nY = map_y
         
         'Convert_Heading_to_Direction heading, nX, nY
         
         'Make sure it's a legal move
-        If Map_Bounds(nx, ny) Then
+        If Map_Bounds(nX, nY) Then
         
             'Move it
             Light_Erase light_index
 
-            light_list(light_index).map_x = nx
-            light_list(light_index).map_y = ny
+            light_list(light_index).map_x = nX
+            light_list(light_index).map_y = nY
     
             Light_Move_By_Head = True
             
@@ -4372,7 +4333,7 @@ Sub Engine_Load_Bodies()
     
     Close #N
     
-    'Delete_File resource_path & "Personajes.ind"
+    Delete_File resource_path & "Personajes.ind"
     If FileExist(resource_path & "Personajes.ind", vbNormal) Then Kill resource_path & "Personajes.ind"
 End Sub
 Sub Engine_Load_Heads()
@@ -4411,7 +4372,7 @@ Sub Engine_Load_Heads()
     
     Close #N
     
-    'Delete_File resource_path & "Cabezas.ind"
+    Delete_File resource_path & "Cabezas.ind"
     If FileExist(resource_path & "Cabezas.ind", vbNormal) Then Kill resource_path & "Cabezas.ind"
 End Sub
 Sub Engine_Load_Helmet()
@@ -4449,7 +4410,7 @@ Sub Engine_Load_Helmet()
     
     Close #N
     
-    'Delete_File resource_path & "Cascos.ind"
+    Delete_File resource_path & "Cascos.ind"
     If FileExist(resource_path & "Cascos.ind", vbNormal) Then Kill resource_path & "Cascos.ind"
     
 End Sub
@@ -4478,7 +4439,7 @@ Sub Engine_Load_Fxs()
     
     Close #N
     
-    'Delete_File resource_path & "Fxs.ind"
+    Delete_File resource_path & "Fxs.ind"
     If FileExist(resource_path & "Fx.ind", vbNormal) Then Kill resource_path & "Fxs.ind"
     
 End Sub
@@ -4510,7 +4471,7 @@ On Error Resume Next
     
     Set Leer = Nothing
     
-    'Delete_File resource_path & "armas.dat"
+    Delete_File resource_path & "armas.dat"
     If FileExist(resource_path & "armas.dat", vbNormal) Then Kill resource_path & "armas.dat"
     
 End Sub
@@ -4537,7 +4498,7 @@ On Error Resume Next
     
     Set Leer = Nothing
     
-    'Delete_File resource_path & "escudos.dat"
+    Delete_File resource_path & "escudos.dat"
     If FileExist(resource_path & "escudos.dat", vbNormal) Then Kill resource_path & "escudos.dat"
     
 End Sub
@@ -4608,9 +4569,8 @@ Function Map_Legal_Pos(ByVal X As Integer, ByVal Y As Integer) As Boolean
     End If
     
     If MapData(X, Y).CharIndex > 0 Then
-        If Not charlist(MapData(X, Y).CharIndex).Muerto Then
-            Exit Function
-        End If
+        'If Not charlist(MapData(X, Y).CharIndex).Muerto Then
+        Exit Function
     End If
    
     If UserNavegando <> Map_Have_Water(X, Y) Then
@@ -4634,7 +4594,14 @@ Function Map_Have_Water(ByVal X As Integer, ByVal Y As Integer) As Boolean
                 
 End Function
 Sub Engine_Move(ByVal Direccion As E_Heading, Optional refresh As Boolean = True)
-
+'***************************************************
+'Author: Alejandro Santos (AlejoLp)
+'Last Modify Date: 06/28/2008
+'Last Modified By: Lucas Tavolaro Ortiz (Tavo)
+' 06/03/2006: AlejoLp - Elimine las funciones Move[NSWE] y las converti a esta
+' 12/08/2007: Tavo    - Si el usuario esta paralizado no se puede mover.
+' 06/28/2008: NicoNZ - Saqué lo que impedía que si el usuario estaba paralizado se ejecute el sub.
+'***************************************************
     Dim LegalOk As Boolean
     
     If refresh Then
@@ -4655,19 +4622,13 @@ Sub Engine_Move(ByVal Direccion As E_Heading, Optional refresh As Boolean = True
     End Select
     
     LegalOk = LegalOk And (IIf(under_stair, Direccion = NORTH Or Direccion = SOUTH, True))
-
+    
     If LegalOk And Not UserParalizado Then
-
-        If estaHabilitadoParaCaminar Then
-            estaHabilitadoParaCaminar = False
-            Call WriteWalk(Direccion)
-            
-            If Not UserDescansar Then
-                TileEngine.Char_Move_Head char_current, Direccion
-                TileEngine.Engine_MoveScreen Direccion
-            End If
+        Call WriteWalk(Direccion)
+        If Not UserDescansar Then
+            TileEngine.Char_Move_Head char_current, Direccion
+            TileEngine.Engine_MoveScreen Direccion
         End If
-        
     Else
         If charlist(char_current).heading <> Direccion Then
             Call WriteChangeHeading(Direccion)

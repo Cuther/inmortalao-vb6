@@ -11,11 +11,6 @@ Attribute VB_Name = "modDeclaraciones"
 
 Option Explicit
 
-Public Const VersionCliente As Byte = 3
-
-Public activateTempDrawInv As Boolean
-Public estaHabilitadoParaCaminar As Boolean
-
 Public Const iFragataFantasmal = 87
 Public Const iBarca = 84
 Public Const iGalera = 85
@@ -23,11 +18,10 @@ Public Const iGaleon = 86
 
 Public serverList As String
 
+Public Security As New clsSecurity
 Public perm As Boolean
+Public ALaMierda As Boolean
 Public thFPSAndHour As Long
-Public thUpdatePosition As Long
-Public thDrawGame As Long
-Public thFlushBuffer As Long
 
 Public FramesPerSecCounter As Integer
 Public FPS As Integer
@@ -61,7 +55,7 @@ Public tCartel As Integer
 Public Audio As clsAudio
 Public Inventario As clsGrapchicalInventory
 Public CustomKeys As clsCustomKeys
-
+Public MainTimer As clsTimer
 Public incomingData As clsByteQueue
 Public outgoingData As clsByteQueue
 Public UserIndex As Integer
@@ -420,6 +414,7 @@ Public Const MENSAJE_PRODUCE_IMPACTO_TORSO As String = " en el torso por "
 
 Public Const MENSAJE_TRABAJO As String = "Haz click sobre el objetivo..."
 
+Public LlegaronEstadisticas As Boolean
 
 'Inventario
 Type Inventory
@@ -966,7 +961,7 @@ Public MouseS As Long
     End Type
     
     'Info de un objeto
-    Public Type obj
+    Public Type Obj
         OBJIndex As Integer
         Amount As Integer
         tipe As Byte
@@ -988,7 +983,7 @@ Public MouseS As Long
         effectIndex As Integer
         
         NPCIndex As Integer
-        OBJInfo As obj
+        OBJInfo As Obj
         TileExit As WorldPos
         Blocked As Byte
         

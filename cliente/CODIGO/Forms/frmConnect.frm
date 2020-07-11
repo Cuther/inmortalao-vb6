@@ -20,6 +20,7 @@ Begin VB.Form frmConnect
    EndProperty
    KeyPreview      =   -1  'True
    LinkTopic       =   "Form1"
+   LockControls    =   -1  'True
    MaxButton       =   0   'False
    MinButton       =   0   'False
    ScaleHeight     =   600
@@ -122,12 +123,6 @@ Begin VB.Form frmConnect
       Top             =   1845
       Width           =   3645
    End
-   Begin VB.Image reloadServers 
-      Height          =   495
-      Left            =   9720
-      Top             =   1320
-      Width           =   495
-   End
    Begin VB.Image cmdMinimizar 
       Height          =   345
       Left            =   11280
@@ -175,8 +170,7 @@ Private Sub c_Click()
 End Sub
 
 Private Sub cmdCerrar_Click()
-    prgRun = False
-    CloseClient
+End
 End Sub
 
 Private Sub cmdMinimizar_Click()
@@ -189,12 +183,14 @@ End Sub
 
 Private Sub Form_KeyUp(KeyCode As Integer, Shift As Integer)
     If KeyCode = vbKeyEscape Then
-        CloseClient
+        prgRun = False
     End If
 End Sub
 
 Private Sub Form_Load()
-    
+Dim servers() As String
+Dim i As Integer
+
     Me.Picture = LoadInterface("conectar")
     Me.Icon = frmMain.Icon
     
@@ -219,17 +215,59 @@ Private Sub Form_Load()
             Me, True
     
     
+
     Usertxt.refresh
     
     Me.Visible = True
     
-    reloadServers_Click
+    
+    If perm = True Then
+        'WebBrowser1.Navigate ("http://inmortalao.com.ar/index2.php?noticias=true")
+        'serverList = mInet.OpenURL("http://inmortalao.com.ar/getserver2.php")
+    End If
+
+'Castelli no entiendo para que se lo puso aca :S
+'Para que no se bugee el GIU
+    DoEvents
+    
+    lst_servers.Clear
+    
+    If Len(serverList) > 0 Then
+    
+        'servers = Split(serverList, vbNewLine, 10)
+        'servers = serverList
+        
+        Debug.Print serverList
+        'Recorremos el arreglo y vamos insertando _
+        los elementos del array en el ListBox
+        'For i = 1 To UBound(servers)
+            lServer(1).Ip = ReadField(1, serverList, 59)
+            lServer(1).port = val(ReadField(2, serverList, 59))
+            lServer(1).name = ReadField(3, serverList, 59)
+            lServer(1).id = val(ReadField(4, serverList, 59))
+            lst_servers.AddItem lServer(1).name
+            
+            Debug.Print "---------------"
+            Debug.Print ">" & lServer(1).Ip
+            Debug.Print ">" & lServer(1).port
+            Debug.Print ">" & lServer(1).name
+            Debug.Print ">" & lServer(1).id
+        'Next
+    Else
+        lServer(1).Ip = "200.43.192.242"
+        lServer(1).port = 7777
+        lServer(1).name = "InmortalAO [Estado no reconocible]"
+        lServer(1).id = 0
+        lst_servers.AddItem lServer(1).name
+    End If
+
+    lServer(1).Ip = "192.168.0.222"
+    lServer(1).port = 7777
+  
+    lst_servers.ListIndex = 0
+    
     
     frmMain.Visible = False
-
-Exit Sub
-err:
-Debug.Print err.Description
 
 End Sub
 
@@ -243,14 +281,13 @@ End Sub
 
 Private Sub cmdNewAccount_Click()
 
-    'ShellExecute Me.hwnd, "open", "http://inmortalao.com.ar/login.php?action=register", "", "", 1
+    ShellExecute Me.hwnd, "open", "http://inmortalao.com.ar/login.php?action=register", "", "", 1
 End Sub
 
 Private Sub cmdConnect_Click()
 On Error Resume Next
 
-
-    perm = False
+perm = False
     cCursores.Parse_Form frmConnect, E_WAIT
     
     If frmMain.Socket1.Connected Then
@@ -298,71 +335,3 @@ Dim f As Integer
     LeerInt = Input$(LOF(f), #f)
     Close #f
 End Function
-
-Private Sub reloadServers_Click()
-
-    On Error Resume Next
-
-    Dim servers() As String
-    Dim i As Integer
-    
-    
-    'Dim ie As Object
-    'Set ie = CreateObject("InternetExplorer.Application")
-    'Dim thePage As Object'
-
-    'With ie
-    '   .Visible = True
-    '
-    '  .Navigate "http://inmortalao.com.ar/getserver2.php"
-    'End With
-
-    'Set thePage = ie.Document
-
-    
-    If perm = True Then
-        'WebBrowser1.Navigate ("http://inmortalao.com.ar/index2.php?noticias=true")
-        'On Error GoTo Err
-        WebBrowser1.Navigate ("http://inmortalao.com.ar/noticias.php")
-        'serverList = thePage.documentElement.innerHTML
-        serverList = mInet.OpenURL("http://inmortalao.com.ar/getserver2.php")
-    End If
-
-    'Castelli no entiendo para que se lo puso aca :S
-    'Para que no se bugee el GIU
-    DoEvents
-    
-    lst_servers.Clear
-    
-    If Len(serverList) > 0 Then
-    
-        servers = Split(serverList, "-", 10)
-        'servers = serverList
-        
-        Debug.Print serverList
-        'Recorremos el arreglo y vamos insertando _
-        los elementos del array en el ListBox
-        For i = 0 To UBound(servers)
-            lServer(i + 1).Ip = ReadField(1, servers(i), 59)
-            lServer(i + 1).port = val(ReadField(2, servers(i), 59))
-            lServer(i + 1).name = ReadField(3, servers(i), 59)
-            lServer(i + 1).id = val(ReadField(4, servers(i), 59))
-            lst_servers.AddItem lServer(i + 1).name
-            
-        Next i
-    Else
-        lServer(1).Ip = "200.43.192.242"
-        lServer(1).port = 7777
-        lServer(1).name = "InmortalAO [Estado no reconocible]"
-        lServer(1).id = 0
-        lst_servers.AddItem lServer(1).name
-    End If
-
-    'lServer(1).Ip = "186.136.128.108"
-    'lServer(1).Ip = "192.168.0.15"
-    'lServer(1).Ip = "192.168.0.198"
-    'lServer(1).port = 7777
-    
-    lst_servers.ListIndex = 0
-End Sub
-

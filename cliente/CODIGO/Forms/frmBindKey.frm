@@ -324,7 +324,7 @@ Select Case MacroKeys(FNUM).TipoAccion
     Case 1 'Envia comando
         Call ParseUserCommand("/" & MacroKeys(FNUM).SendString)
     Case 2 'Lanza hechizo
-        If frmMain.hlst.List(MacroKeys(FNUM).hlist - 1) <> "(None)" Then
+        If frmMain.hlst.List(MacroKeys(FNUM).hlist - 1) <> "(None)" And MainTimer.Check(TimersIndex.Work, False) Then
             If UserEstado = 1 Then Exit Sub
             Call WriteCastSpell(MacroKeys(FNUM).hlist)
             Call WriteWork(eSkill.Magia)
@@ -333,7 +333,7 @@ Select Case MacroKeys(FNUM).TipoAccion
         If UserEstado = 1 Then Exit Sub
         Call WriteEquipItem(MacroKeys(FNUM).invslot)
     Case 4 'Usa
-        Call WriteUseItem(MacroKeys(FNUM).invslot)
+        If MainTimer.Check(TimersIndex.UseItemWithU) Then Call WriteUseItem(MacroKeys(FNUM).invslot)
 
 End Select
 

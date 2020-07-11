@@ -1759,7 +1759,7 @@ Private Sub Form_Load()
 
     lstHogar.Clear
     lstHogar.AddItem "Nix (Imperio)"
-    lstHogar.AddItem "Illiandor (República)"
+    lstHogar.AddItem "Suramei (República)"
     
 
     lstRaza.Clear

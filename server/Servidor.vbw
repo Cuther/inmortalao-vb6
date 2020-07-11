@@ -1,4 +1,4 @@
-Acciones = 78, 78, 700, 520, C
+Acciones = 78, 78, 700, 520, Z
 Admin = 78, 78, 700, 520, C
 AI = 104, 104, 726, 546, C
 modSistemaComercio = 104, 104, 726, 546, C
@@ -37,7 +37,7 @@ modSendData = 52, 52, 674, 494,
 Cuentas = 26, 26, 896, 392, 
 modSubastas = 78, 78, 556, 520, 
 Base = 156, 156, 778, 598, 
-modConeccion = 0, 0, 622, 442, Z
+modConeccion = 0, 0, 622, 442, 
 modConWSAPI = 52, 52, 674, 494, 
 clsSecurity = 208, 208, 686, 650, 
 Eventos = 208, 208, 686, 650, 

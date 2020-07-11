@@ -43,6 +43,13 @@ Begin VB.Form frmCantidad
       Top             =   840
       Width           =   975
    End
+   Begin VB.Image imgTodo 
+      Height          =   405
+      Left            =   1125
+      Tag             =   "0"
+      Top             =   840
+      Width           =   945
+   End
    Begin VB.Image imgCerrar 
       Height          =   330
       Left            =   1920
@@ -62,13 +69,6 @@ Begin VB.Form frmCantidad
       Top             =   630
       Width           =   195
    End
-   Begin VB.Image imgTodo 
-      Height          =   405
-      Left            =   1125
-      Tag             =   "0"
-      Top             =   840
-      Width           =   945
-   End
 End
 Attribute VB_Name = "frmCantidad"
 Attribute VB_GlobalNameSpace = False
@@ -82,7 +82,7 @@ Private Sub Form_Load()
 End Sub
 
 Private Sub Form_MouseDown(Button As Integer, Shift As Integer, X As Single, Y As Single)
-    If Button = vbLeftButton Then Auto_Drag Me.hwnd
+    If Button = vbLeftButton Then Auto_Drag Me.hWnd
 End Sub
 
 Private Sub Form_MouseMove(Button As Integer, Shift As Integer, X As Single, Y As Single)
@@ -139,12 +139,12 @@ End If
 End Sub
 
 Private Sub imgMas_Click()
-txtCant.Text = val(txtCant.Text) + 1
+txtCant.Text = Val(txtCant.Text) + 1
 End Sub
 Private Sub imgMenos_Click()
 
-If val(txtCant.Text) > 0 Then _
-    txtCant.Text = val(txtCant.Text) - 1
+If Val(txtCant.Text) > 0 Then _
+    txtCant.Text = Val(txtCant.Text) - 1
 
 End Sub
 Private Sub imgTodo_Click()
@@ -205,11 +205,11 @@ End If
 End Sub
 Private Sub txtCant_Change()
 On Error GoTo ErrHandler
-    If val(txtCant.Text) < 0 Then
+    If Val(txtCant.Text) < 0 Then
         txtCant.Text = "1"
     End If
     
-    If val(txtCant.Text) > MAX_INVENTORY_OBJS Then
+    If Val(txtCant.Text) > MAX_INVENTORY_OBJS Then
         txtCant.Text = "10000"
     End If
     

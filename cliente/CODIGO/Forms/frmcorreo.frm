@@ -293,17 +293,7 @@ Private Sub cmdSend_Click()
     Unload Me
 End Sub
 
-Private Sub Form_Unload(Cancel As Integer)
-    Dim i As Long
-    For i = 1 To 20
-        Correos(i).De = ""
-        Correos(i).mensaje = ""
-        Correos(i).item = 0
-        Correos(i).Cantidad = 0
-    Next
-End Sub
-
-Public Sub actualizar_inventario()
+Private Sub Form_Load()
     Dim i As Long
     lstInv.Clear
     
@@ -316,6 +306,15 @@ Public Sub actualizar_inventario()
     Next i
 End Sub
 
+Private Sub Form_Unload(Cancel As Integer)
+    Dim i As Long
+    For i = 1 To 20
+        Correos(i).De = ""
+        Correos(i).mensaje = ""
+        Correos(i).item = 0
+        Correos(i).Cantidad = 0
+    Next
+End Sub
 
 Private Sub lstMsg_Click()
 

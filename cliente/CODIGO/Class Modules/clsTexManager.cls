@@ -136,12 +136,12 @@ Private Function CrearGrafico(ByVal Archivo As Integer, ByRef texwidth As Long, 
 'On Error GoTo Err
     Dim surface_desc As D3DSURFACE_DESC
     Dim texture_info As D3DXIMAGE_INFO
-    Dim Index As Integer
+    Dim index As Integer
     Dim Arch As String
     Dim bufferB() As Byte
     
-    Index = Archivo Mod HASH_TABLE_SIZE
-    With TexList(Index)
+    index = Archivo Mod HASH_TABLE_SIZE
+    With TexList(index)
         .surfaceCount = .surfaceCount + 1
         ReDim Preserve .SurfaceEntry(1 To .surfaceCount) As SURFACE_ENTRY_DYN
         With .SurfaceEntry(.surfaceCount)
@@ -183,8 +183,8 @@ Private Function CrearGrafico(ByVal Archivo As Integer, ByRef texwidth As Long, 
 
     Exit Function
 
-err:
-    Debug.Print "ERROR EN GRHLOAD>" & Archivo & ".bmp" & "-Desc:" & err.Description
+Err:
+    Debug.Print "ERROR EN GRHLOAD>" & Archivo & ".bmp" & "-Desc:" & Err.Description
     Debug.Print file
 End Function
 Private Function RemoveLRU() As Boolean

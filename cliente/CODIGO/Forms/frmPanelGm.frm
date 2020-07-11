@@ -1304,7 +1304,7 @@ End Sub
 
 Private Sub cmdActualiza_Click()
     Call WriteRequestUserList
- 'Call FlushBuffer
+ Call FlushBuffer
 End Sub
 
 

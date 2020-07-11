@@ -1,5 +1,5 @@
 VERSION 5.00
-Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.1#0"; "MSCOMCTL.OCX"
+Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "MSCOMCTL.ocx"
 Begin VB.Form frmSubastas 
    BorderStyle     =   4  'Fixed ToolWindow
    Caption         =   "Centro de Subastas"
@@ -254,7 +254,7 @@ On Error Resume Next
 End Sub
 
 Private Sub cmdActualizar_Click()
-    Call WriteSRequest
+'    Call WriteSRequest
 End Sub
 
 Private Sub cmdBuscar_Click()
@@ -267,23 +267,27 @@ Private Sub cmdBuscar_Click()
 End Sub
 
 Private Sub cmdBuyOut_Click()
-    If sI > 0 Then
-        Call WriteSComprar(sI)
-        Call WriteSRequest
-    End If
+'    If sI > 0 Then
+  '      Call WriteSComprar(sI)
+        'Add Nod Kopfnickend Y Actualizamos la pantalla
+   '     Call WriteSRequest
+        '\Add
+  '  End If
 End Sub
 
 Private Sub cmdNewAuction_Click()
-    frmSubastaNueva.Show , Me
+'    frmSubastaNueva.Show , Me
 End Sub
 
 Private Sub cmdOfertar_Click()
-    If sI > 0 Then
-        If val(txtOfertar.Text) > lstSubastas(sI).actOfert Then
-            Call WriteSOfrecer(sI, val(txtOfertar.Text))
-            Call WriteSRequest
-        End If
-    End If
+'    If sI > 0 Then
+  '      If val(txtOfertar.Text) > lstSubastas(sI).actOfert Then
+   '         Call WriteSOfrecer(sI, val(txtOfertar.Text))
+            'Add Nod Kopfnickend Y Actualizamos la pantalla
+    '        Call WriteSRequest
+            '\Add
+    '    End If
+    'End If
 End Sub
 
 Private Sub cmdSalir_Click()

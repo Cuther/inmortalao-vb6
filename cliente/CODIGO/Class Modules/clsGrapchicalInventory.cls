@@ -171,6 +171,7 @@ Public Sub DrawInventory()
     
     If DragItem <> 0 And Drag = 1 Then
         Call TileEngine.Draw_Grh_Index(UserInventory(DragItem).grhindex, MouseX - 16, MouseY - 16)
+        Debug.Print DragItem
         RenderInv = True
     Else
         RenderInv = False
@@ -266,19 +267,7 @@ Private Sub InventoryWindow_MouseUp(Button As Integer, Shift As Integer, X As Si
     InvSelectedItem = ClickItem(CInt(X), CInt(Y))
 
     If Drag Then
-        If Not DragItem = TempItem And Not (TempItem < 1 Or DragItem < 1) Then
-            WriteDragAndDrop TempItem, DragItem
-            
-            Dim i As Integer
-    
-            For i = LBound(MacroKeys) To UBound(MacroKeys)
-                If MacroKeys(i).invslot = DragItem Then
-                    MacroKeys(i).invslot = TempItem
-                End If
-            Next i
-            
-        End If
-        
+        If Not DragItem = TempItem And Not (TempItem < 1 Or DragItem < 1) Then WriteDragAndDrop TempItem, DragItem
         DragItem = 0
         Drag = 0
     End If

@@ -1,3 +1,2 @@
-Line 91: Class RichTextLib.RichTextBox of control RecCombat was not a loaded control class.
-Line 122: Class RichTextLib.RichTextBox of control RecGlobal was not a loaded control class.
-Line 366: Class RichTextLib.RichTextBox of control RecChat was not a loaded control class.
+Línea 37: la clase SocketWrenchCtrl.Socket del control Socket1 no era una clase de control cargada.
+Línea 418: la clase MSWinsockLib.Winsock del control Winsock1 no era una clase de control cargada.

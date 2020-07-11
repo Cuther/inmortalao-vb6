@@ -191,8 +191,6 @@ Public Sub SaveCustomKeys()
 'Last Modification: 08/04/07
 '
 '***************************************************
-    On Error GoTo error:
-    
     Dim FileNum As Integer
     Dim i As Long
     FileNum = FreeFile()
@@ -206,12 +204,6 @@ Public Sub SaveCustomKeys()
     Next i
     
     Close #FileNum
-    
-    Exit Sub
-    
-error:
-    MsgBox (App.Path & " " & err.Description)
-    
 End Sub
 
 ''
@@ -340,7 +332,7 @@ On Error GoTo ErrHand:
     Exit Sub
     
 ErrHand:
-    If err.Number = ERROR_NO_KEY_FILE Then
+    If Err.number = ERROR_NO_KEY_FILE Then
         Call LoadDefaults
         Call SaveCustomKeys
         Resume Next
