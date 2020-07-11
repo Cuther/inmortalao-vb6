@@ -1,0 +1,5 @@
+Line 2: Could not create reference: '{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0'.
+Line 26: Class MSComctlLib.ProgressBar of control cargar was not a loaded control class.
+Line 32: The property name _ExtentX in cargar is invalid.
+Line 33: The property name _ExtentY in cargar is invalid.
+Line 34: The property name _Version in cargar is invalid.

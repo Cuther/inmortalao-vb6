@@ -1,0 +1,26 @@
+[INIT]
+NumObjs=9
+
+[OBJ1] 'Vestimentas comunes
+Index=31
+
+[OBJ2] 'Túnica de Absorción Mágica (RM +5)
+Index=1091
+
+[OBJ3] 'Túnica de Absorción Mágica (RM +15)
+Index=1090
+
+[OBJ4] 'Túnica de Absorción Mágica (RM +15) (Bajos)
+Index=1092
+
+[OBJ5] 'Túnica Dorada
+Index=519
+
+[OBJ6] 'Gorro Ancestral
+Index=1202
+
+[OBJ7] 'Gorro Ígneo
+Index=1203
+
+[OBJ8] 'Gorro Arcano
+Index=1206

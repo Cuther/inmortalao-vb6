@@ -1,0 +1,138 @@
+[INIT]
+NumArmaduras=45
+
+
+[Armadura1] ' Armadura de Cuero Endurecido (RM +10)
+Index=1139
+
+[Armadura2] ' Armadura de Placas Completa +1
+Index=390
+
+[Armadura3] ' Armadura de Placas Completa +1 (Bajos)
+Index=392
+
+[Armadura4] ' Armadura de Placas Completa +2
+Index=391
+
+[Armadura5] ' Armadura de Placas Completa +2 (Bajos)
+Index=393
+
+[Armadura6] ' Armadura de Placas Dorada (RM +10)
+Index=1093
+
+[Armadura7] ' Armadura de Esmeraldas (Bajos)
+Index=901
+
+[Armadura8] ' Armadura de Nigromante
+Index=903
+
+[Armadura9] ' Cotas de Bandas Ocre
+Index=485
+
+[Armadura10] ' Armadura Escarlata
+Index=495
+
+[Armadura11] 'Armadura Completa Murex
+Index=496
+
+[Armadura12] ' Armadura de Pieles
+Index=872
+
+[Armadura13] ' Armadura de Mithril (Mujer)
+Index=487
+
+[Armadura14] ' Armadura Legendaria
+Index=1211
+
+[Armadura15] ' Armadura Legendaria (Bajos)
+Index=1212
+
+[Armadura16] ' Armadura de Dragón Negro
+Index=1217
+
+[Armadura17] ' Armadura de Dragón Negro (Mujer)
+Index=1216
+
+[Armadura18] ' Armadura de Dragón Negro (Bajos)
+Index=1218
+
+[Armadura19] ' Armadura de Dragón Verde
+Index=1214
+
+[Armadura20] ' Armadura de Dragón Verde (Mujer)
+Index=1213
+
+[Armadura21] ' Armadura de Dragón Verde (Bajos)
+Index=1215
+
+[Armadura22] ' Armadura de Dragón Blanco
+Index=876
+
+[Armadura23] ' Armadura de Dragón Blanco (Mujer)
+Index=877
+
+[Armadura24] ' Armadura de Dragón Blanco (Bajos)
+Index=878
+
+[Armadura25] ' Armadura de Dragón Azul
+Index=873
+
+[Armadura26] ' Armadura de Dragón Azul (Mujer)
+Index=874
+
+[Armadura27] ' Armadura de Dragón Azul (Bajos)
+Index=875
+
+[Armadura28] ' Armadura de Dragón Rojo
+Index=481
+
+[Armadura29] ' Armadura de Dragón Rojo (Mujer)
+Index=482
+
+[Armadura30] ' Armadura de Dragón Rojo (Bajos)
+Index=483
+
+[Armadura31] ' Escudo de León
+Index=658
+
+[Armadura32] ' Escudo de León +1
+Index=1100
+
+[Armadura33] ' Escudo de Reflexión (RM +15)
+Index=1088
+
+[Armadura34] ' Escudo de Torre
+Index=1003
+
+[Armadura35] ' Escudo de Torre +1
+Index=1002
+
+[Armadura36] ' Escudo de Tortuga +1
+Index=1007
+
+[Armadura37] ' Escudo Dual
+Index=1267
+
+[Armadura38] ' Escudo Mediano
+Index=1268
+
+[Armadura39] ' Escudo Arcano
+Index=1358
+
+[Armadura40] ' Casco Dorado
+Index=661
+
+[Armadura41] ' Casco Pretoriano
+Index=990
+
+[Armadura42] ' Casco Bifurcado
+Index=1078
+
+[Armadura43] ' Casco Vikingo
+Index=1079
+
+[Armadura44] ' Casco Nórdico
+Index=1266
+
+[Armadura45] ' Casco Legendario
+Index=1276

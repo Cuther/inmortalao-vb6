@@ -1,0 +1,9 @@
+[INIT]
+NumLines=5
+
+[Help]
+Line1=* Reglamento del juego: http://inmortalao.com.ar/terminos-de-uso.php (OBLIGATORIO LEER!)
+Line2=* Manual del juego: http://inmortalao.com.ar/ayuda.php 
+Line3=* Si estás muerto, dirígete a una ciudad y busca un Sacerdote, él te resucitará.
+Line4=* Para denunciar un acto ilegal de otro usuario utiliza el comando /DENUNCIAR, indicando -luego de la palabra denunciar- el nombre del personaje denunciado y qué acto iegal está cometiendo. 
+Line5=* Recuerden que en la página oficial de InmortalAO encontrarán toda la información que necesiten para jugar y las noticias actualizadas sobre el juego.

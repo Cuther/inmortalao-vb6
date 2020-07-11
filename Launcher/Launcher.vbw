@@ -1,0 +1,5 @@
+frmMain = 110, 110, 426, 552, , 22, 22, 340, 464, C
+clsButtonFlash = 22, 22, 340, 464, 
+modMain = 88, 88, 404, 530, 
+modCompression = 88, 88, 627, 556, 
+modUpdate = 88, 88, 625, 556, Z

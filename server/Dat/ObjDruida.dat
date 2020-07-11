@@ -1,0 +1,29 @@
+[INIT]
+NumObjs=9
+
+[OBJ1] 'Poción Violeta (Alquimia)
+Index=890
+
+[OBJ2] 'Poción Roja (Alquimia)
+Index=891
+
+[OBJ3] 'Poción Azul (Alquimia)
+Index=894
+
+[OBJ4] 'Poción Amarilla (Alquimia)
+Index=889
+
+[OBJ5] 'Poción Verde (Alquimia)
+Index=892
+
+[OBJ6] 'Poción Anti-Ceguera (Alquimia)
+Index=895
+
+[OBJ7] 'Poción Anti-Estupidez (Alquimia)
+Index=896
+
+[OBJ8] 'Poción de Invisibilidad (Alquimia)
+Index=1096
+
+[OBJ9] 'Poción de Remover Parálisis (Alquimia)
+Index=893

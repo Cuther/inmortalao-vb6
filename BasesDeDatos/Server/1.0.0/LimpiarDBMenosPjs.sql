@@ -1,0 +1,10 @@
+#delete from charbanco where indexpj > 4;
+#delete from charcorreo where indexpj > 4;
+#delete from charfaccion where indexpj > 4;
+#delete from charflags where indexpj > 4;
+#delete from charfrags where indexpj > 4;
+#delete from charguild where indexpj > 4;
+#delete from charhechizos where indexpj > 4;
+#delete from charmascotafami where indexpj > 4;
+#delete from charskills where indexpj > 4;
+#delete from charstats where indexpj > 4;

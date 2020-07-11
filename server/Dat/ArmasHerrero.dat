@@ -1,0 +1,68 @@
+[INIT]
+NumArmas=22
+
+[Arma1] ' Daga
+Index=15
+
+[Arma2] ' Daga +4
+Index=367
+
+[Arma3] ' Daga +5
+Index=746
+
+[Arma4] ' Daga de Plata
+Index=559
+
+[Arma5] ' Daga Ignea
+Index=1261
+
+[Arma6] ' Daga Infernal
+Index=740
+
+[Arma7] ' Espada Corta +1
+Index=743
+
+[Arma8] ' Sica de Fuego
+Index=904
+
+[Arma9] ' Espada de Lazurt
+Index=744
+
+[Arma10] ' Espada de Lazurt +1
+Index=747
+
+[Arma11] ' Harbinger Kin
+Index=668
+
+[Arma12] ' Sica de Lazurt
+Index=906
+
+[Arma13] ' Espada Saramiana
+Index=1257
+
+[Arma14] ' Hacha de Plata
+Index=1243
+
+[Arma15] ' Hacha de Plata +1
+Index=1245
+
+[Arma16] ' Hacha Saramiana
+Index=1244
+
+[Arma17] ' Martillo de Guerra +1
+Index=1148
+
+[Arma18] ' Daga Arrojadiza
+Index=671
+
+[Arma19] ' Espada Mata Dragones
+Index=402
+
+[Arma20] ' Báculo de Hechicero (DM +10)
+Index=1181
+
+[Arma21] ' Báculo de Larzüll
+Index=1252
+
+[Arma22] ' Nudillos de Oro 
+Index=1333
